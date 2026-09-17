@@ -7,6 +7,8 @@ import { SITE } from '../data/site'
  * 카카오(다음) 지도 SDK 를 autoload=false 로 받아 daum.maps.load() 로 초기화하고,
  * 지도 상자를 지켜보다가(ResizeObserver) 크기가 잡히면 그때 만듭니다.
  * SDK 를 못 받으면 주소를 대신 보여 줍니다.
+ *
+ * 휠은 페이지 스크롤에 그대로 쓰이고, Ctrl(⌘) 을 누른 채 굴릴 때만 확대·축소됩니다.
  */
 
 /** SDK 주소 */
@@ -15,18 +17,30 @@ const SDK_SRC = 'https://ssl.daumcdn.net/dmaps/map_js_init/v3.js?autoload=false'
 /** 확대 단계 (1 = 가장 가까이) */
 const MAP_LEVEL = 1
 
+/** 카카오 지도 확대 단계 범위 */
+const MIN_LEVEL = 1
+const MAX_LEVEL = 14
+
+/** 휠 한 번으로 볼 확대 단계 — 휠 델타를 모아서 넘으면 한 단계 움직입니다. */
+const WHEEL_STEP = 30
+
 type LatLng = unknown
 
 type MapInstance = {
   relayout: () => void
   setCenter: (position: LatLng) => void
+  getLevel: () => number
+  setLevel: (level: number) => void
 }
 
 type KakaoNamespace = {
   maps: {
     load: (callback: () => void) => void
     LatLng: new (lat: number, lng: number) => LatLng
-    Map: new (node: HTMLElement, options: { center: LatLng; level: number }) => MapInstance
+    Map: new (
+      node: HTMLElement,
+      options: { center: LatLng; level: number; scrollwheel?: boolean },
+    ) => MapInstance
     Marker: new (options: { position: LatLng }) => { setMap: (map: MapInstance) => void }
   }
 }
@@ -100,6 +114,7 @@ export default function KakaoMap() {
 
     let alive = true
     let observer: ResizeObserver | null = null
+    let unwatchWheel: (() => void) | null = null
 
     loadSdk()
       .then((kakao) => {
@@ -107,6 +122,49 @@ export default function KakaoMap() {
 
         const center = new kakao.maps.LatLng(SITE.coords.lat, SITE.coords.lng)
         let map: MapInstance | null = null
+        /** 휠 델타 누적값 — 모아서 WHEEL_STEP 을 넘을 때만 한 단계 움직입니다. */
+        let wheelDelta = 0
+
+        /*
+         * 지도는 기본적으로(scrollwheel: false) 휠을 받지 않으므로
+         * 지도 위에서 휠을 굴려도 페이지가 그대로 스크롤됩니다.
+         * Ctrl(⌘) 을 누른 채 굴릴 때만 확대·축소합니다.
+         */
+        const onWheel = (event: WheelEvent) => {
+          if (!event.ctrlKey && !event.metaKey) return
+          if (!map) return
+
+          // 브라우저 자체의 페이지 확대를 막습니다.
+          event.preventDefault()
+          // 지도 SDK 쪽으로 넘겨 다른 확대가 겹치지 않게 합니다.
+          event.stopPropagation()
+
+          // 파이어폭스 등은 줄/페이지 단위로 오기 때문에 픽셀로 맞춰 줍니다.
+          const unit = event.deltaMode === 1 ? 16 : event.deltaMode === 2 ? 100 : 1
+
+          wheelDelta += event.deltaY * unit
+
+          if (Math.abs(wheelDelta) < WHEEL_STEP) return
+
+          const current = map.getLevel()
+          const next = Math.min(
+            MAX_LEVEL,
+            Math.max(MIN_LEVEL, current + (wheelDelta > 0 ? 1 : -1)),
+          )
+
+          wheelDelta = 0
+
+          if (next === current) return
+
+          // ⚠ setLevel 의 anchor 옵션에 화면 픽셀 좌표를 주면 중심이 엉뚱한 곳으로 옮겨져
+          //    지도가 빈 화면이 되어 버립니다(실측 확인). 화면 중심 기준으로만 확대·축소합니다.
+          map.setLevel(next)
+        }
+
+        // 지도 내부 요소보다 먼저 잫기 위해 캐쳐 단계에서 등록합니다.
+        box.addEventListener('wheel', onWheel, { passive: false, capture: true })
+        unwatchWheel = () =>
+          box.removeEventListener('wheel', onWheel, { capture: true })
 
         observer = new ResizeObserver(() => {
           // 크기가 잡히기 전에는 지도를 만들지 않습니다.
@@ -121,7 +179,7 @@ export default function KakaoMap() {
 
           box.replaceChildren()
 
-          map = new kakao.maps.Map(box, { center, level: MAP_LEVEL })
+          map = new kakao.maps.Map(box, { center, level: MAP_LEVEL, scrollwheel: false })
           new kakao.maps.Marker({ position: center }).setMap(map)
         })
 
@@ -133,6 +191,7 @@ export default function KakaoMap() {
 
     return () => {
       alive = false
+      unwatchWheel?.()
       observer?.disconnect()
       box.replaceChildren()
     }
@@ -148,6 +207,10 @@ export default function KakaoMap() {
             <p>{SITE.address}</p>
           </div>
         )}
+
+        <p className="map__hint">
+          <kbd>Ctrl</kbd> + 스크롤로 확대·축소
+        </p>
       </div>
 
       <ul className="map__apps">
