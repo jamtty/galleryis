@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { fetchPublicNoticeList, type PublicNoticeItem } from '@/api/notices'
+import { useSiteSettings } from '@/store/useSiteSettings'
 import NoticeList from '../components/NoticeList'
 import PageHeader from '../components/PageHeader'
 
@@ -29,6 +30,8 @@ const INITIAL_STATE: ListState = {
 export default function NoticesPage() {
   const [page, setPage] = useState(1)
   const [list, setList] = useState<ListState>(INITIAL_STATE)
+  /** 제목 아래 문구 — 관리자 [환경설정] 에서 고칩니다. */
+  const { pageNoticesLede } = useSiteSettings()
 
   useEffect(() => {
     let cancelled = false
@@ -73,7 +76,7 @@ export default function NoticesPage() {
 
   return (
     <>
-      <PageHeader title="소식" />
+      <PageHeader title="소식" lede={pageNoticesLede} />
 
       <div className="page-body">
         {loading && <p className="page-note">불러오는 중입니다...</p>}

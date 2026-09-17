@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { Link, useLocation } from 'react-router-dom'
+import logoImage from '@/assets/images/logo.gif'
 import { NAV_ITEMS, PATHS, isNavItemActive } from '../routes/paths'
-import Logo from './Logo'
 import { CloseIcon, MenuIcon } from './icons'
 
 export default function Header() {
@@ -48,7 +48,11 @@ export default function Header() {
             className="brand"
             onClick={() => window.scrollTo({ top: 0 })}
           >
-            <Logo />
+            <img
+              src={logoImage}
+              alt="갤러리 이즈"
+              className="brand__logo"
+            />
           </Link>
 
           <nav

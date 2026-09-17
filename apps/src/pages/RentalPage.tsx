@@ -1,6 +1,7 @@
 import PageHeader from '@/components/PageHeader'
 import RentalSchedule from '@/components/rental/RentalSchedule'
 import SectionHead from '@/components/SectionHead'
+import { useSiteSettings } from '@/store/useSiteSettings'
 
 /** 01 ~ 04 안내 */
 const STEPS = [
@@ -23,9 +24,12 @@ const STEPS = [
 ] as const
 
 export default function RentalPage() {
+  /** 제목 아래 문구 — 관리자 [환경설정] 에서 고칩니다. */
+  const { pageRentalLede } = useSiteSettings()
+
   return (
     <>
-      <PageHeader title="대관" />
+      <PageHeader title="대관" lede={pageRentalLede} />
 
       <section id="rental" className="section scroll-anchor">
         {/* 01 ~ 04 */}

@@ -7,6 +7,7 @@ import {
 import ExhibitionGrid from '../components/ExhibitionGrid'
 import PageHeader from '../components/PageHeader'
 import { PATHS } from '../routes/paths'
+import { useSiteSettings } from '@/store/useSiteSettings'
 
 /** 탭 — 분류별 목록 */
 const STATUS_TABS = [
@@ -54,6 +55,8 @@ export default function ExhibitionsPage() {
   const key = `${status}|${page}`
 
   const [list, setList] = useState<ListState>(INITIAL_STATE)
+  /** 제목 아래 문구 — 관리자 [환경설정] 에서 고칩니다. */
+  const { pageExhibitionsLede } = useSiteSettings()
 
   useEffect(() => {
     let cancelled = false
@@ -110,7 +113,7 @@ export default function ExhibitionsPage() {
 
   return (
     <>
-      <PageHeader title="전시">
+      <PageHeader title="전시" lede={pageExhibitionsLede}>
         <nav className="tabs" aria-label="전시 구분">
           {STATUS_TABS.map((tab) => {
             const isActive = tab.status === status

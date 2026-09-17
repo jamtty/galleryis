@@ -24,6 +24,7 @@ import AdminPopupPage from './pages/admin/AdminPopupPage'
 import AdminRentalEditPage from './pages/admin/AdminRentalEditPage'
 import AdminRentalRequestPage from './pages/admin/AdminRentalRequestPage'
 import AdminRentalSchedulePage from './pages/admin/AdminRentalSchedulePage'
+import AdminSettingPage from './pages/admin/AdminSettingPage'
 import { PATHS } from './routes/paths'
 
 /**
@@ -74,6 +75,7 @@ export const router = createBrowserRouter([
           { path: 'popups', element: <AdminPopupPage /> },
           { path: 'popups/write', element: <AdminPopupFormPage /> },
           { path: 'popups/edit/:id', element: <AdminPopupFormPage /> },
+          { path: 'settings', element: <AdminSettingPage /> },
           { path: 'mypage', element: <AdminMyPage /> },
           { path: '*', element: <Navigate to={PATHS.adminRentals} replace /> },
         ],

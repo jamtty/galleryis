@@ -44,12 +44,27 @@ backend/
 │     ├─ create.php     POST  공지 등록 (multipart)
 │     ├─ update.php     POST  공지 수정 (multipart)
 │     └─ delete.php     POST  공지 삭제 (첨부도 함께)
+│  └─ settings/
+│     ├─ public.php     GET   공개 설정값 — 인증 없음 (테이블 없으면 기본값)
+│     ├─ detail.php     GET   설정 정의 + 값 (관리자)
+│     └─ update.php     POST  설정 저장 (관리자, JSON)
 └─ sql/
    ├─ schema.sql        관리자 테이블 생성 + 초기 계정
    ├─ exhibition.sql    전시 테이블 (exhibition · exhibition_file)
    ├─ exhibition_status_column.sql  분류(ex_status) 컴럼 추가 (기존 설치용)
+   ├─ site_setting.sql  사이트 환경설정 테이블 (site_setting · 키 = 값)
    └─ notice_check.sql  공지 레거시 테이블 구조 확인 (읽기 전용)
 ```
+
+## 환경설정 (site_setting)
+
+관리자 [환경설정] 메뉴에서 페이지 제목 아래 문구 같은 값을 고칩니다.
+
+- 저장소: `site_setting` 테이블 — `st_key`(기본키) · `st_value`
+- 정의(키 · 제목 · 입력 종류): `lib/setting.php` 의 `setting_definitions()` **가 단일 기준**
+- 새 설정 추가: `setting_definitions()` 에 한 줄 + (필요하면) `sql/site_setting.sql` 에 초기값 한 줄
+  → 관리자 화면은 서버가 내려 주는 정의를 그대로 그리므로 프론트 수정이 필요 없습니다.
+  → 공개 화면에서 쓸 값이면 `'public' => true` 로 적고 `apps/src/api/settings.ts` 의 `SETTING_KEYS` 에 키를 추가합니다.
 
 ## 배포 순서
 

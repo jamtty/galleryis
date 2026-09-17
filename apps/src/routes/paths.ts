@@ -40,6 +40,8 @@ export const PATHS = {
   adminPopupForm: '/admin/popups/write',
   /** 관리자 — 팝업 수정 (목록의 [상세]) */
   adminPopupEdit: '/admin/popups/edit/:id',
+  /** 관리자 — 환경설정 (페이지 안내문구 등) */
+  adminSettings: '/admin/settings',
   adminMyPage: '/admin/mypage',
 } as const
 
@@ -66,9 +68,15 @@ export const ADMIN_MENU_SECTIONS: readonly AdminMenuSection[] = [
     items: [
       { to: PATHS.adminRentals, label: '대관 신청', icon: 'mail' },
       { to: PATHS.adminSchedule, label: '대관 일정', icon: 'calendar_today' },
-      { to: PATHS.adminExhibitions, label: '전시', icon: 'image' },
+      { to: PATHS.adminExhibitions, label: '작품전시', icon: 'image' },
       { to: PATHS.adminNotices, label: '공지', icon: 'campaign' },
       { to: PATHS.adminPopups, label: '팝업', icon: 'web_asset' },
+    ],
+  },
+  {
+    label: '설정',
+    items: [
+      { to: PATHS.adminSettings, label: '환경설정', icon: 'settings' },
     ],
   },
   {

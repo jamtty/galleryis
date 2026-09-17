@@ -48,14 +48,20 @@
 }
 
 .brand__logo {
-  height: 1.6rem;
+  /* 실제 로고 이미지(logo.gif) — 원본 162 × 69 */
+  height: 5rem;
   width: auto;
   flex-shrink: 0;
 }
 
+/*
+ * PC(640px~) 에서는 로고를 더 크게 — 아래 규칙이 위 기본값을 덮어씁니다.
+ * (위 기본값만 키우면 여기 4rem 이 이겨서 PC 에서 오히려 작아 보입니다)
+ */
 @media (min-width: 640px) {
   .brand__logo {
-    height: 2rem;
+    width:16.2rem;
+    height:auto;
   }
 }
 
@@ -1397,6 +1403,12 @@ a.notice-detail__file_name:focus-visible {
 .page-note {
   font-size: var(--text-base);
   color: var(--color-ink-soft);
+}
+
+/* 긴 안내문 (개인정보처리방침 등) — 읽기 좋은 폭으로 가운데 정렬 */
+.page-doc {
+  max-width: 84rem;
+  margin-inline: auto;
 }
 
 /* --------------------------------------------------------------------------
@@ -2802,4 +2814,258 @@ a.notice-detail__file_name:focus-visible {
     padding: 2rem;
     font-size: 1.6rem;
   }
+}
+
+/* --------------------------------------------------------------------------
+   13. 갤러리 이즈 (소개) — 원본 https://galleryis.web.app/about
+   -------------------------------------------------------------------------- */
+/* 내용은 110rem — 공지 상세(.notice-detail)와 같은 폭으로 가운데 정렬합니다. */
+.about-doc {
+  max-width: 110rem;
+  margin-inline: auto;
+  /* 이 사이트는 body 에 word-break: keep-all 이 걸려 있습니다.
+     좁은 폭에서 긴 문장이 접히지 않고 밖으로 나가는 것을 막는 안전장치입니다. */
+  overflow-wrap: anywhere;
+}
+
+/* 섹션 제목 — 밑줄 + 제목 크기 (원본: border-b · text-title · bold) */
+.section-title {
+  padding-bottom: 1.2rem;
+  border-bottom: 1px solid var(--color-line);
+  font-family: var(--font-display);
+  font-size: var(--text-title);
+  font-weight: 700;
+  line-height: 1.25;
+  letter-spacing: -0.01em;
+  overflow-wrap: anywhere;
+}
+
+/* 인트로 — 넓은 화면에서는 글과 그림을 2단으로 */
+.about-intro {
+  display: grid;
+}
+
+@media (min-width: 1024px) {
+  .about-intro {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+.about-intro__text {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 4rem 2.4rem;
+  background: var(--color-surface-warm);
+}
+
+@media (min-width: 640px) {
+  .about-intro__text {
+    padding: 5.6rem 4rem;
+  }
+}
+
+.about-intro__body {
+  margin-top: 2.4rem;
+  font-size: 1.6rem;
+  line-height: 1.625;
+  /* 원본 break-keep — 단, 한 단어가 폭보다 길면 넘치지 않게 강제로 접습니다. */
+  word-break: keep-all;
+  overflow-wrap: anywhere;
+}
+
+.about-intro__body > p + p {
+  margin-top: 1.6rem;
+}
+
+.about-intro__media {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4rem 2.4rem;
+}
+
+@media (min-width: 640px) {
+  .about-intro__media {
+    padding: 5.6rem 4rem;
+  }
+}
+
+.about-intro__media img {
+  width: auto;
+  max-width: 100%;
+  /* 원본 max-h-[32rem] = 512px */
+  max-height: 51.2rem;
+}
+
+@media (min-width: 1024px) {
+  .about-intro__media {
+    display: block;
+    padding: 0;
+  }
+
+  .about-intro__media img {
+    width: 100%;
+    height: 100%;
+    max-height: none;
+    object-fit: cover;
+  }
+}
+
+/* 관람 안내 · 문의 — 세로로 한 줄씩 (2단 아님) */
+.about-info {
+  display: grid;
+  gap: 5.6rem;
+  margin-top: 5.6rem;
+}
+
+@media (min-width: 640px) {
+  .about-info {
+    margin-top: 8rem;
+  }
+}
+
+/* 안내 목록 — 제목(dt) · 내용(dd) 한 줄씩 */
+.info-list {
+  margin-top: 0.8rem;
+}
+
+.info-list__row {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  padding-block: 1.6rem;
+  border-bottom: 1px solid var(--color-line);
+}
+
+@media (min-width: 640px) {
+  .info-list__row {
+    flex-direction: row;
+    gap: 3.2rem;
+  }
+}
+
+.info-list dt {
+  font-size: var(--text-sm);
+  font-weight: 700;
+  line-height: 1.5;
+}
+
+@media (min-width: 640px) {
+  .info-list dt {
+    flex-shrink: 0;
+    width: 12.8rem;
+    padding-top: 0.2rem;
+  }
+}
+
+.info-list dd {
+  /*
+   * 이 사이트는 common.css 에 `* { flex-shrink: 0 }` 이 전역으로 걸려 있습니다.
+   * 그래서 flex 행(dt + dd)에서 내용이 줄어들지 못하고, 줄바꿈 대신 오른쪽으로 밀려 나갑니다.
+   * 목록 내용만이라도 줄어들 수 있게 풀어 줍니다.
+   */
+  flex-shrink: 1;
+  min-width: 0;
+  font-size: var(--text-base);
+  line-height: 1.65;
+  /* 원본은 기본 줄바꿈 — 전역 keep-all(body) 을 물려받지 않게 되돌립니다. */
+  word-break: normal;
+  overflow-wrap: anywhere;
+}
+
+.info-list__note {
+  display: block;
+  margin-top: 0.4rem;
+  color: var(--color-ink-soft);
+}
+
+/* 내용을 줄 단위로 나눠 보여 줄 때 (버스 안내 등) */
+.info-list__line {
+  display: block;
+}
+
+/* 위쪽에 굵은 선을 두는 목록 (오시는 길) */
+.info-list--top {
+  margin-top: 4rem;
+  border-top: 1px solid var(--color-ink);
+}
+
+/* 오시는 길 */
+.about-visit {
+  margin-top: 5.6rem;
+  scroll-margin-top: 8rem;
+}
+
+@media (min-width: 1024px) {
+  .about-visit {
+    scroll-margin-top: 9.6rem;
+  }
+}
+
+/* 지도 */
+.map {
+  margin-top: 2.4rem;
+}
+
+.map__frame {
+  position: relative;
+  width: 100%;
+  height: 38rem;
+  overflow: hidden;
+  border: 1px solid var(--color-line);
+  background: var(--color-surface);
+}
+
+@media (min-width: 640px) {
+  .map__frame {
+    height: 45rem;
+  }
+}
+
+.map__canvas {
+  position: absolute;
+  inset: 0;
+}
+
+.map__fallback {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding-inline: 2.4rem;
+  text-align: center;
+  background: var(--color-surface);
+}
+
+.map__fallback p {
+  font-size: var(--text-sm);
+  line-height: 1.625;
+  color: var(--color-ink-soft);
+}
+
+.map__apps {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.8rem;
+  margin-top: 1.6rem;
+}
+
+@media (min-width: 640px) {
+  .map__apps {
+    gap: 1.2rem;
+  }
+}
+
+/* 밑줄 링크 (이메일 등) */
+.link-underline {
+  text-decoration: underline;
+  text-decoration-color: var(--color-line-lit);
+  text-underline-offset: 4px;
+  transition: color var(--dur) var(--ease);
+}
+
+.link-underline:hover {
+  color: var(--color-ink);
+  text-decoration-color: var(--color-ink);
 }

@@ -1281,9 +1281,48 @@ select.adm_btn_secondary {
   line-height: 1.6;
   transition: border-color 0.15s;
   background: #fff;
+  resize:none;
 }
 .adm_form_textarea:focus {
   border-color: #2563eb;
+}
+
+/* ── 환경설정 (그룹 상자 + 입력칸 도움말) ─────────────────── */
+.adm_setting_group {
+  display: flex;
+  flex-direction: column;
+  gap: 1.6rem;
+  padding: 2rem 2.4rem 2.4rem;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.8rem;
+  background: #fafafa;
+}
+.adm_setting_group_title {
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: #111827;
+}
+.adm_setting_group_help {
+  margin-top: -0.8rem;
+  font-size: 1.3rem;
+  line-height: 1.6;
+  color: #6b7280;
+}
+.adm_setting_hint {
+  display: flex;
+  justify-content: space-between;
+  gap: 1.2rem;
+  margin-top: 0.6rem;
+  font-size: 1.2rem;
+  line-height: 1.5;
+  color: #9ca3af;
+}
+.adm_setting_count {
+  flex-shrink: 0;
+}
+.adm_setting_count.is-over {
+  color: #dc2626;
+  font-weight: 600;
 }
 .adm_checkbox_label {
   display: flex;

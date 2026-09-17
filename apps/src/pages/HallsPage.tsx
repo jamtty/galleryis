@@ -1,10 +1,9 @@
+import { useSiteSettings } from '@/store/useSiteSettings'
 import BlankPage from '../components/BlankPage'
 
 export default function HallsPage() {
-  return (
-    <BlankPage
-      title="전시장"
-      lede="하나의 건축물 안에 네 개의 독립적인 전시실"
-    />
-  )
+  /** 제목 아래 문구 — 관리자 [환경설정] 에서 고칩니다. */
+  const { pageHallsLede } = useSiteSettings()
+
+  return <BlankPage title="전시장" lede={pageHallsLede} />
 }
