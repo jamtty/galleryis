@@ -1,0 +1,619 @@
+@charset "UTF-8";
+
+@font-face {
+  font-family: 'Pretendard';
+  font-weight: 900;
+  font-display: swap;
+  src:
+    local('Pretendard Black'),
+    url('../fonts/Pretendard/Pretendard-Black.woff2') format('woff2'),
+    url('../fonts/Pretendard/Pretendard-Black.woff') format('woff');
+}
+
+@font-face {
+  font-family: 'Pretendard';
+  font-weight: 800;
+  font-display: swap;
+  src:
+    local('Pretendard ExtraBold'),
+    url('../fonts/Pretendard/Pretendard-ExtraBold.woff2') format('woff2'),
+    url('../fonts/Pretendard/Pretendard-ExtraBold.woff') format('woff');
+}
+
+@font-face {
+  font-family: 'Pretendard';
+  font-weight: 700;
+  font-display: swap;
+  src:
+    local('Pretendard Bold'),
+    url('../fonts/Pretendard/Pretendard-Bold.woff2') format('woff2'),
+    url('../fonts/Pretendard/Pretendard-Bold.woff') format('woff');
+}
+
+@font-face {
+  font-family: 'Pretendard';
+  font-weight: 600;
+  font-display: swap;
+  src:
+    local('Pretendard SemiBold'),
+    url('../fonts/Pretendard/Pretendard-SemiBold.woff2') format('woff2'),
+    url('../fonts/Pretendard/Pretendard-SemiBold.woff') format('woff');
+}
+
+@font-face {
+  font-family: 'Pretendard';
+  font-weight: 500;
+  font-display: swap;
+  src:
+    local('Pretendard Medium'),
+    url('../fonts/Pretendard/Pretendard-Medium.woff2') format('woff2'),
+    url('../fonts/Pretendard/Pretendard-Medium.woff') format('woff');
+}
+
+@font-face {
+  font-family: 'Pretendard';
+  font-weight: 400;
+  font-display: swap;
+  src:
+    local('Pretendard Regular'),
+    url('../fonts/Pretendard/Pretendard-Regular.woff2') format('woff2'),
+    url('../fonts/Pretendard/Pretendard-Regular.woff') format('woff');
+}
+
+@font-face {
+  font-family: 'Pretendard';
+  font-weight: 300;
+  font-display: swap;
+  src:
+    local('Pretendard Light'),
+    url('../fonts/Pretendard/Pretendard-Light.woff2') format('woff2'),
+    url('../fonts/Pretendard/Pretendard-Light.woff') format('woff');
+}
+
+@font-face {
+  font-family: 'Pretendard';
+  font-weight: 200;
+  font-display: swap;
+  src:
+    local('Pretendard ExtraLight'),
+    url('../fonts/Pretendard/Pretendard-ExtraLight.woff2') format('woff2'),
+    url('../fonts/Pretendard/Pretendard-ExtraLight.woff') format('woff');
+}
+
+@font-face {
+  font-family: 'Pretendard';
+  font-weight: 100;
+  font-display: swap;
+  src:
+    local('Pretendard Thin'),
+    url('../fonts/Pretendard/Pretendard-Thin.woff2') format('woff2'),
+    url('../fonts/Pretendard/Pretendard-Thin.woff') format('woff');
+}
+
+@font-face {
+  font-family: 'GmarketSans';
+  font-weight: 700;
+  font-display: swap;
+  src:
+    local('Gmarket Sans Bold'),
+    url('../fonts/GmarketSans/GmarketSansTTFBold.woff2') format('woff2'),
+    url('../fonts/GmarketSans/GmarketSansTTFBold.woff') format('woff');
+}
+
+@font-face {
+  font-family: 'GmarketSans';
+  font-weight: 500;
+  font-display: swap;
+  src:
+    local('Gmarket Sans Medium'),
+    url('../fonts/GmarketSans/GmarketSansTTFMedium.woff2') format('woff2'),
+    url('../fonts/GmarketSans/GmarketSansTTFMedium.woff') format('woff');
+}
+
+@font-face {
+  font-family: 'GmarketSans';
+  font-weight: 300;
+  font-display: swap;
+  src:
+    local('Gmarket Sans Light'),
+    url('../fonts/GmarketSans/GmarketSansTTFLight.woff2') format('woff2'),
+    url('../fonts/GmarketSans/GmarketSansTTFLight.woff') format('woff');
+}
+
+
+/* 초기화 */
+html { font-size:10px; }
+
+@media (max-width: 1600px) {
+  html { font-size:9px; }
+}
+
+@media (max-width: 767px) {
+  html { font-size:12px; }
+}
+
+html,
+body {
+  height: 100%;
+}
+body {
+  margin: 0;
+  padding: 0;
+  font-family: 'Pretendard', dotum, sans-serif;
+  line-height: 1.5;
+  
+}
+html,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+form,
+fieldset,
+img {
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: 'Pretendard', dotum, sans-serif;
+}
+article,
+aside,
+details,
+figcaption,
+figure,
+footer,
+header,
+hgroup,
+menu,
+nav,
+section {
+  display: block;
+}
+
+ul,
+dl,
+dt,
+dd {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+ol {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+legend {
+  position: absolute;
+  margin: 0;
+  padding: 0;
+  font-size: 0;
+  line-height: 0;
+  text-indent: -9999em;
+  overflow: hidden;
+}
+label,
+input,
+button,
+select,
+img {
+  vertical-align: middle;
+}
+input,
+button {
+  margin: 0;
+  padding: 0;
+  font-family: 'Pretendard', dotum, sans-serif;
+}
+input[type='submit'] {
+  cursor: pointer;
+}
+button {
+  cursor: pointer;
+  border: 0;
+  background-color: transparent;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+td {
+  padding: 0;
+}
+
+textarea,
+select {
+  font-family: 'Pretendard', dotum, sans-serif;
+}
+textarea {
+  resize: none;
+}
+select {
+  margin: 0;
+}
+p {
+  margin: 0;
+  padding: 0;
+  word-break: break-all;
+}
+hr {
+  display: none;
+}
+pre {
+  overflow-x: scroll;
+}
+a {
+  color: #000;
+  text-decoration: none;
+}
+
+table caption {
+  position: absolute;
+  overflow: hidden;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  border: 0;
+  clip: rect(0, 0, 0, 0);
+}
+*,
+:after,
+:before {
+  -webkit-box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  box-sizing: border-box;
+}
+
+.sr_only,
+.skip_nav {
+  position: absolute;
+  overflow: hidden;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  border: 0;
+  clip: rect(0, 0, 0, 0);
+}
+
+input,
+select,
+textarea {
+  border: 0;
+  outline: none;
+}
+
+input[readonly] {
+  background-color: #eee;
+  padding: 0 15px;
+  color: #555;
+}
+
+img {
+  display: block;
+  max-width: 100%;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  font: inherit;
+  color: inherit;
+  font-family: "Pretendard", sans-serif;
+}
+*,
+:after,
+:before {
+  box-sizing: border-box;
+  flex-shrink: 0;
+}
+:root {
+  -webkit-tap-highlight-color: transparent;
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+  cursor: default;
+  line-height: 1.5;
+  overflow-wrap: break-word;
+  word-break: break-word;
+  tab-size: 4;
+}
+html,
+body {
+  height: 100%;
+}
+img,
+picture,
+video,
+canvas,
+svg {
+  display: block;
+  max-width: 100%;
+}
+button {
+  background: none;
+  border: 0;
+  cursor: pointer;
+}
+a {
+  text-decoration: none;
+}
+table {
+  border-collapse: collapse;
+  border-spacing: 0;
+}
+ol,
+ul,
+dl,
+dt,
+dd {
+  list-style: none;
+}
+
+/* ==========================================================================
+   디자인 토큰 · 기본 설정 · 레이아웃 유틸리티
+   ─ 실제 사이트(galleryis.web.app)의 토큰을 기준으로 하되,
+     이 파일의 html { font-size: 10px } 스케일(1rem = 10px)에 맞춰 값을 환산했습니다.
+   ─ 화면별 디자인은 style.css 에 있습니다.
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   디자인 토큰
+   -------------------------------------------------------------------------- */
+:root {
+  /* 색상 */
+  --color-ground: #fff;
+  --color-surface: #fff;
+  --color-surface-hi: #f5f5f5;
+  --color-surface-warm: #faf6f2;
+  --color-line: #e3e3e3;
+  --color-line-lit: #8a8a8a;
+  --color-ink: #333;
+  --color-ink-soft: #666;
+  --color-ground-soft: #a3a3a3;
+  --color-accent-ink: #b23c0e;
+
+  /* 타이포그래피 (px → rem 환산: 10px 기준) */
+  --font-sans: 'Pretendard', 'Noto Sans KR', ui-sans-serif, system-ui,
+    sans-serif;
+  --font-display: var(--font-sans);
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+
+  --text-sm: 1.4rem; /* 14px */
+  --text-base: 1.7rem; /* 17px */
+  --text-lg: 1.8rem; /* 18px */
+  --text-2xl: 2.4rem; /* 24px */
+  --text-3xl: 3rem; /* 30px */
+  --text-display: clamp(3.6rem, 5vw, 6.4rem); /* 36 ~ 64px */
+  --text-headline: clamp(2.6rem, 2.8vw, 3.6rem); /* 26 ~ 36px */
+  --text-title: clamp(2rem, 1.9vw, 2.4rem); /* 20 ~ 24px */
+
+  /* 레이아웃 */
+  --app-max: 176rem; /* 1760px */
+  --page-pad-x: 2rem; /* 20px */
+  --radius-sm: 0.4rem; /* 4px */
+
+  /* 모션 */
+  --dur: 0.15s;
+  --dur-slow: 0.5s;
+  --ease: cubic-bezier(0.4, 0, 0.2, 1);
+  --ease-rise: cubic-bezier(0.22, 1, 0.36, 1);
+
+  color-scheme: light;
+}
+
+@media (min-width: 640px) {
+  :root {
+    --page-pad-x: 3.2rem; /* 32px */
+  }
+}
+
+@media (min-width: 1024px) {
+  :root {
+    --page-pad-x: 5.6rem; /* 56px */
+  }
+}
+
+/* --------------------------------------------------------------------------
+   기본 요소 보정 (레거시 리셋 위에 덮어씁니다)
+   -------------------------------------------------------------------------- */
+body {
+  font-family: var(--font-sans);
+  font-size: var(--text-base);
+  line-height: 1.65;
+  color: var(--color-ink);
+  background: var(--color-ground);
+  word-break: keep-all;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+p {
+  word-break: keep-all;
+}
+
+a {
+  color: inherit;
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-ink);
+  outline-offset: 2px;
+}
+
+/* --------------------------------------------------------------------------
+   레이아웃 유틸리티
+   -------------------------------------------------------------------------- */
+
+/* 앱 전체 셸 */
+.app-shell {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  min-height: 100dvh;
+  background: var(--color-ground);
+  color: var(--color-ink);
+}
+
+/* 헤더 / 본문 / 푸터를 감싸는 최대 폭 프레임 */
+.app-frame {
+  display: flex;
+  flex: 1 0 auto;
+  flex-direction: column;
+  width: 100%;
+  max-width: var(--app-max);
+  margin-inline: auto;
+}
+
+.app-main {
+  flex: 1 0 auto;
+}
+
+/* 좌우 여백 */
+.pad-x {
+  padding-inline: var(--page-pad-x);
+}
+
+/* 스크롤 앵커 보정 (sticky 헤더 높이) */
+.scroll-anchor {
+  scroll-margin-top: 8rem;
+}
+
+@media (min-width: 1024px) {
+  .scroll-anchor {
+    scroll-margin-top: 9.6rem;
+  }
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* --------------------------------------------------------------------------
+   타이포그래피 유틸리티
+   -------------------------------------------------------------------------- */
+.font-display {
+  font-family: var(--font-display);
+}
+
+.text-sm {
+  font-size: var(--text-sm);
+}
+
+.text-base {
+  font-size: var(--text-base);
+}
+
+.text-lg {
+  font-size: var(--text-lg);
+}
+
+.text-display {
+  font-size: var(--text-display);
+  line-height: 1.15;
+  letter-spacing: -0.02em;
+}
+
+.text-headline {
+  font-size: var(--text-headline);
+  line-height: 1.2;
+  letter-spacing: -0.01em;
+}
+
+.text-title {
+  font-size: var(--text-title);
+  line-height: 1.25;
+  letter-spacing: -0.01em;
+}
+
+.text-ink-soft {
+  color: var(--color-ink-soft);
+}
+
+.text-accent {
+  color: var(--color-accent-ink);
+}
+
+.tabular-nums {
+  font-variant-numeric: tabular-nums;
+}
+
+/* --------------------------------------------------------------------------
+   애니메이션
+   -------------------------------------------------------------------------- */
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes breathe {
+  0%,
+  100% {
+    opacity: 0.6;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.animate-rise {
+  animation: rise 0.7s var(--ease-rise) both;
+}
+
+/* 스크롤 진입 시 등장 (지원 브라우저에서만 동작) */
+.reveal {
+  animation: rise linear both;
+  animation-timeline: view();
+  animation-range: entry entry 55%;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  .animate-rise,
+  .reveal,
+  .skeleton {
+    animation: none;
+  }
+}

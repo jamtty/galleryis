@@ -1,0 +1,28 @@
+# ---------------------------------------------------------------------------
+# 공통 보안 설정
+# ---------------------------------------------------------------------------
+
+# CGI/FastCGI 환경에서 Authorization 헤더가 PHP 로 전달되도록 합니다.
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+  RewriteCond %{HTTP:Authorization} ^(.+)$
+  RewriteRule .* - [E=HTTP_AUTHORIZATION:%1]
+</IfModule>
+
+# 디렉터리 목록 노출 금지
+Options -Indexes
+
+# 설정 파일 / 라이브러리 / SQL 직접 접근 차단
+<FilesMatch "^(config.*\.php|\.gitignore)$">
+  <IfModule mod_authz_core.c>
+    Require all denied
+  </IfModule>
+  <IfModule !mod_authz_core.c>
+    Order allow,deny
+    Deny from all
+  </IfModule>
+</FilesMatch>
+
+<IfModule mod_rewrite.c>
+  RewriteRule ^(lib|sql)/ - [F,L]
+</IfModule>

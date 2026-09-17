@@ -1,0 +1,51 @@
+# ---------------------------------------------------------------------------
+# SPA(React Router) 새로고침 404 방지
+#
+# /rental, /rental/apply, /admin/rentals/edit/4373 ... 같은 주소는
+# 서버에 실제 파일이 없습니다. 브라우저에서 직접 열거나 F5 로 새로고침하면
+# Apache 가 먼저 404 를 돌려주기 때문에 화면이 뜨지 않습니다.
+#
+# → 실제 파일/폴더가 아닌 요청은 전부 index.html 로 넘겨
+#   React Router 가 주소를 해석하도록 합니다.
+#
+# 실제로 존재하는 경로는 그대로 서빙되므로 영향 없습니다.
+#   - /assets/*            빌드된 JS·CSS
+#   - /backend/*           PHP API (자체 .htaccess 사용)
+#   - /uploads/*           첨부파일
+#   - /favicon.svg 등
+#
+# ⚠ 이 파일은 apps/public/ 에 있습니다. (빌드 시 dist/ 루트로 복사됨)
+#   SFTP 업로드 위치 : /galleryiscom/www/.htaccess
+#
+# ⚠ Cafe24 기본 .htaccess 가 이미 있다면 **덮어쓰지 말고 내용을 합치세요.**
+#   (PHP 버전 AddHandler 등이 사라질 수 있습니다)
+# ---------------------------------------------------------------------------
+
+Options -Indexes
+DirectoryIndex index.html
+
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+  RewriteBase /
+
+  # index.html 자체 요청은 그대로 통과 (무한 재작성 방지)
+  RewriteRule ^index\.html$ - [L]
+
+  # 빌드 산출물 경로 제외 — 오래된 청크 요청은 404 로 두는 편이 원인 파악에 낫습니다
+  RewriteRule ^assets/ - [L]
+
+  # 실재하는 파일 또는 폴더면 그대로 서빙
+  RewriteCond %{REQUEST_FILENAME} -f [OR]
+  RewriteCond %{REQUEST_FILENAME} -d
+  RewriteRule ^ - [L]
+
+  # 그 외 모든 주소 → index.html (React Router 담당)
+  RewriteRule . /index.html [L]
+
+  # index.html 은 항상 최신 버전을 받도록 (배포 후 이전 화면이 남는 문제 방지)
+  <IfModule mod_headers.c>
+    <FilesMatch "^index\.html$">
+      Header set Cache-Control "no-cache, must-revalidate"
+    </FilesMatch>
+  </IfModule>
+</IfModule>
