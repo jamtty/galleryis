@@ -8,13 +8,14 @@ import { formatDotRange } from '@/utils/date'
 import { renderBodyHtml } from '@/utils/html'
 import ExhibitionLightbox from '../components/ExhibitionLightbox'
 import PageHeader from '../components/PageHeader'
+import { ArrowLeftIcon } from '../components/icons'
 import { PATHS } from '../routes/paths'
 
 /**
  * 공개 — 전시 상세.
  *
  * 원본 사이트(galleryis.web.app)와 같은 구성입니다.
- *   [전시] 공통 타이틀 → 전시 목록으로
+ *   [전시] 공통 타이틀 → 목록으로(화살표)
  *   → 대표 이미지(왼쪽) · 전시명/작가명/전시기간/전시장소(오른쪽)
  *   → 전시 작품(모바일 2열 · 데스크톱 4열) → 전시 개요 → 작가 약력
  * 사진을 누르면 확대 보기(라이트박스)가 열립니다.
@@ -61,8 +62,16 @@ export default function ExhibitionDetailPage() {
     }
   }, [exId, valid])
 
-  /** 전시 목록으로 — 위는 오른쪽 정렬, 아래는 가운데 (공지 상세와 같은 버튼) */
-  const backButton = (
+  /** 위 — 목록으로 가는 심플한 링크 (화살표 + 글씨 · 오른쪽 정렬) */
+  const backLink = (
+    <Link to={PATHS.exhibitions} className="ex-detail__back">
+      <ArrowLeftIcon className="icon-20" />
+      목록으로
+    </Link>
+  )
+
+  /** 아래 — 공지 상세와 같은 큰 버튼 (가운데 정렬) */
+  const listButton = (
     <Link to={PATHS.exhibitions} className="btn btn--pill btn--outline btn--lg">
       전시 목록으로
     </Link>
@@ -86,7 +95,7 @@ export default function ExhibitionDetailPage() {
         <PageHeader title="전시" kicker />
 
         <div className="page-body">
-          <div className="ex-detail__topbar">{backButton}</div>
+          <div className="ex-detail__topbar">{backLink}</div>
 
           <h2 className="ex-detail__notfound">
             {error ?? '전시를 찾을 수 없습니다.'}
@@ -108,7 +117,7 @@ export default function ExhibitionDetailPage() {
       <PageHeader title="전시" kicker />
 
       <div className="page-body">
-        <div className="ex-detail__topbar">{backButton}</div>
+        <div className="ex-detail__topbar">{backLink}</div>
 
         <article className="ex-detail">
           {/* 대표 이미지 + 전시 정보 (데스크톱 2단) */}
@@ -232,7 +241,7 @@ export default function ExhibitionDetailPage() {
           </div>
         </article>
 
-        <div className="ex-detail__actions">{backButton}</div>
+        <div className="ex-detail__actions">{listButton}</div>
       </div>
 
       {zoomed !== null && images.length > 0 && (

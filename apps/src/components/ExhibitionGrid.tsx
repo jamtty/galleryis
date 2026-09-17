@@ -13,7 +13,8 @@ export default function ExhibitionGrid({
   emptyText = '전시가 아직 없습니다.',
 }: ExhibitionGridProps) {
   if (items.length === 0) {
-    return <p className="page-note">{emptyText}</p>
+    // 카드가 놓일 자리라 글 한 줄을 가운데에 둡니다.
+    return <p className="page-note page-note--center">{emptyText}</p>
   }
 
   return (

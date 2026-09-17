@@ -604,12 +604,11 @@ a {
   animation: rise 0.7s var(--ease-rise) both;
 }
 
-/* 스크롤 진입 시 등장 (지원 브라우저에서만 동작) */
-.reveal {
-  animation: rise linear both;
-  animation-timeline: view();
-  animation-range: entry entry 55%;
-}
+/*
+ * 스크롤 진입 시 등장(.reveal)은 useScrollReveal(GSAP ScrollTrigger)로 옮겼습니다.
+ * CSS scroll-driven animation(animation-timeline)은 인라인 스타일보다 우선해서
+ * GSAP 과 겹치면 GSAP 이 건 opacity·transform 이 무시됩니다.
+ */
 
 @media (prefers-reduced-motion: reduce) {
   html {
@@ -617,13 +616,9 @@ a {
   }
 
   .animate-rise,
-  .reveal,
   .skeleton {
     animation: none;
   }
-}
-
-.animate-rise,.reveal,.skeleton{
 }
 
 /* ==========================================================================

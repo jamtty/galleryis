@@ -1,5 +1,6 @@
 import { useEffect } from 'react'
 import { Outlet, useLocation } from 'react-router-dom'
+import { useScrollReveal } from '../hooks/useScrollReveal'
 import BackToTop from './BackToTop'
 import Footer from './Footer'
 import Header from './Header'
@@ -12,6 +13,9 @@ export default function Layout() {
   useEffect(() => {
     window.scrollTo({ top: 0 })
   }, [pathname])
+
+  // 스크롤하면 요소가 부드럽게 나타나고 사라집니다 (GSAP ScrollTrigger).
+  useScrollReveal(pathname)
 
   return (
     <div className="app-shell">

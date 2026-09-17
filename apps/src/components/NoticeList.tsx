@@ -23,7 +23,7 @@ export default function NoticeList({
   const visible = limit ? items.slice(0, limit) : items
 
   return (
-    <ul className="notice-list reveal">
+    <ul className="notice-list">
       {visible.map((notice) => (
         <li
           key={notice.id}

@@ -271,8 +271,13 @@
    -------------------------------------------------------------------------- */
 .hero {
   display: grid;
-  border-bottom: 1px solid var(--color-line);
   grid-template-columns: repeat(2, minmax(0, 1fr));
+  /*
+   * 메인 스와이프 영역이 화면 높이를 가득 채웁니다.
+   * 위에 붙는 헤더(.site-header__inner min-height 8rem) 높이만큼만 빼 줍니다.
+   * 좌우 두 단은 같은 줄이라 스테이지도 이 높이에 맞춰 늘어납니다.
+   */
+  min-height: calc(100dvh - 8rem);
 }
 
 .hero__body {
@@ -284,9 +289,13 @@
   padding-right: 6.4rem;
 }
 
+/*
+ * 등장 효과는 useScrollReveal(GSAP ScrollTrigger)이 담당합니다.
+ * CSS animation 은 fill-mode: both 인 경우 끝난 뒤에도 인라인 스타일보다 우선해서
+ * GSAP 이 걸어 둔 opacity·transform 이 무시되므로 여기서는 두지 않습니다.
+ */
 .hero__content {
   margin-block: auto;
-  animation: rise 0.7s var(--ease-rise) both;
 }
 
 .hero__kicker {
@@ -340,15 +349,16 @@
 .hero__stage {
   display: grid;
   place-items: center;
+  /* .hero 가 화면 높이를 채우므로 여기는 최소 높이만 잡아 둡니다. */
   min-height: 57.6rem;
   padding: 5.6rem;
-  background: var(--color-surface-hi);
 }
 
 .hero__image {
   width: auto;
   max-width: 100%;
-  max-height: 51.2rem;
+  /* 스테이지 높이(패딩 제외)를 넘지 않는 선에서 최대한 크게 — 비율 유지 */
+  max-height: 100%;
   object-fit: contain;
   animation: fade-in 0.3s ease-out both;
 }
@@ -368,9 +378,7 @@
   row-gap: 4.8rem;
 }
 
-.exhibition-card {
-  animation: rise 0.7s var(--ease-rise) both;
-}
+/* 카드 한 장씩 차례로 등장하는 효과는 useScrollReveal(GSAP)이 담당합니다. */
 
 .exhibition-card__media {
   display: flex;
@@ -728,15 +736,33 @@ a.notice-detail__file_name:focus-visible {
 /* --------------------------------------------------------------------------
    7-2. 전시 상세 (원본 사이트와 동일 구성)
    -------------------------------------------------------------------------- */
+/* 상세 페이지의 등장 효과는 useScrollReveal(GSAP)이 담당합니다. */
 .ex-detail {
   margin-top: 4rem;
-  animation: rise 0.7s var(--ease-rise) both;
 }
 
-/* 상단 전시 목록 버튼 — 오른쪽 정렬 */
+/* 상단 — 오른쪽 정렬 (심플한 화살표 한 개) */
 .ex-detail__topbar {
   display: flex;
   justify-content: flex-end;
+}
+
+/* 목록으로 (← 목록으로) — 버튼 테두리 없이 화살표 + 글씨만 */
+.ex-detail__back {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  flex-shrink: 0;
+  min-height: 4.4rem;
+  padding-inline: 0.4rem;
+  font-size: var(--text-sm);
+  font-weight: 500;
+  color: var(--color-ink);
+  transition: color var(--dur) var(--ease);
+}
+
+.ex-detail__back:hover {
+  color: var(--color-ink-soft);
 }
 
 .ex-detail__notfound {
@@ -1122,6 +1148,11 @@ a.notice-detail__file_name:focus-visible {
 .page-note {
   font-size: var(--text-base);
   color: var(--color-ink-soft);
+}
+
+/* 목록이 비어 자리만 남았을 때 (예: "예정 전시가 없습니다.") — 글 한 줄이라 가운데로 */
+.page-note--center {
+  text-align: center;
 }
 
 /* 긴 안내문 (개인정보처리방침 등) — 읽기 좋은 폭으로 가운데 정렬 */
@@ -1635,7 +1666,6 @@ a.notice-detail__file_name:focus-visible {
   background: var(--color-surface-hi);
   font-size: var(--text-base);
   line-height: 1.65;
-  animation: rise 0.7s var(--ease-rise) both;
   text-align: center;
 }
 
@@ -2740,6 +2770,8 @@ a.notice-detail__file_name:focus-visible {
 
   .hero {
     grid-template-columns: revert;
+    /* 헤더가 6.4rem 으로 줄어드는 구간 */
+    min-height: calc(100dvh - 6.4rem);
   }
 
   .hero__body {
@@ -2754,10 +2786,6 @@ a.notice-detail__file_name:focus-visible {
   .hero__stage {
     min-height: 41.6rem;
     padding: 4rem;
-  }
-
-  .hero__image {
-    max-height: 38.4rem;
   }
 
   .exhibition-grid {
