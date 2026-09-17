@@ -122,25 +122,13 @@
 
 
 /* 초기화 */
-html { font-size:10px; }
-
-@media (max-width: 1600px) {
-  html { font-size:9px; }
-}
-
-@media (max-width: 767px) {
-  html { font-size:12px; }
-}
+html {
+  font-size: 10px; }
 
 html,
 body {
-  height: 100%;
 }
 body {
-  margin: 0;
-  padding: 0;
-  font-family: 'Pretendard', dotum, sans-serif;
-  line-height: 1.5;
   
 }
 html,
@@ -218,14 +206,9 @@ input[type='submit'] {
   cursor: pointer;
 }
 button {
-  cursor: pointer;
-  border: 0;
-  background-color: transparent;
 }
 
 table {
-  width: 100%;
-  border-collapse: collapse;
 }
 td {
   padding: 0;
@@ -242,9 +225,6 @@ select {
   margin: 0;
 }
 p {
-  margin: 0;
-  padding: 0;
-  word-break: break-all;
 }
 hr {
   display: none;
@@ -253,8 +233,6 @@ pre {
   overflow-x: scroll;
 }
 a {
-  color: #000;
-  text-decoration: none;
 }
 
 table caption {
@@ -270,9 +248,6 @@ table caption {
 *,
 :after,
 :before {
-  -webkit-box-sizing: border-box;
-  -moz-box-sizing: border-box;
-  box-sizing: border-box;
 }
 
 .sr_only,
@@ -315,18 +290,18 @@ img {
 *,
 :after,
 :before {
+  -webkit-box-sizing: border-box;
+  -moz-box-sizing: border-box;
   box-sizing: border-box;
-  flex-shrink: 0;
 }
+
+/*
+ * 예전에는 여기에 `flex-shrink: 0` 이 전역으로 걸려 있었습니다.
+ * 그러면 flex 안의 글자가 줄어들지 못해 줄바꿈이 안 되고 상자 밖으로 밀려 나갑니다.
+ * (소식 목록 제목, 안내 목록 내용 등)
+ * → 고정 크기 요소(버튼·아이콘 등)에만 각자 flex-shrink: 0 을 줍니다.
+ */
 :root {
-  -webkit-tap-highlight-color: transparent;
-  -webkit-text-size-adjust: 100%;
-  text-size-adjust: 100%;
-  cursor: default;
-  line-height: 1.5;
-  overflow-wrap: break-word;
-  word-break: break-word;
-  tab-size: 4;
 }
 html,
 body {
@@ -341,14 +316,15 @@ svg {
   max-width: 100%;
 }
 button {
-  background: none;
-  border: 0;
   cursor: pointer;
+  border: 0;
+  background-color: transparent;
+  background: none;
 }
 a {
-  text-decoration: none;
 }
 table {
+  width: 100%;
   border-collapse: collapse;
   border-spacing: 0;
 }
@@ -372,65 +348,98 @@ dd {
    -------------------------------------------------------------------------- */
 :root {
   /* 색상 */
-  --color-ground: #fff;
-  --color-surface: #fff;
-  --color-surface-hi: #f5f5f5;
-  --color-surface-warm: #faf6f2;
-  --color-line: #e3e3e3;
-  --color-line-lit: #8a8a8a;
-  --color-ink: #333;
-  --color-ink-soft: #666;
-  --color-ground-soft: #a3a3a3;
-  --color-accent-ink: #b23c0e;
 
-  /* 타이포그래피 (px → rem 환산: 10px 기준) */
-  --font-sans: 'Pretendard', 'Noto Sans KR', ui-sans-serif, system-ui,
-    sans-serif;
-  --font-display: var(--font-sans);
-  --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  /* 타이포그래피 (px → rem 환산: 10px 기준) */ /* 14px */ /* 17px */ /* 18px */ /* 24px */ /* 30px */ /* 36 ~ 64px */ /* 26 ~ 36px */ /* 20 ~ 24px */
 
-  --text-sm: 1.4rem; /* 14px */
-  --text-base: 1.7rem; /* 17px */
-  --text-lg: 1.8rem; /* 18px */
-  --text-2xl: 2.4rem; /* 24px */
-  --text-3xl: 3rem; /* 30px */
-  --text-display: clamp(3.6rem, 5vw, 6.4rem); /* 36 ~ 64px */
-  --text-headline: clamp(2.6rem, 2.8vw, 3.6rem); /* 26 ~ 36px */
-  --text-title: clamp(2rem, 1.9vw, 2.4rem); /* 20 ~ 24px */
-
-  /* 레이아웃 */
-  --app-max: 176rem; /* 1760px */
-  --page-pad-x: 2rem; /* 20px */
-  --radius-sm: 0.4rem; /* 4px */
+  /* 레이아웃 */ /* 1760px */ /* 20px */ /* 4px */
 
   /* 모션 */
+
+  -webkit-tap-highlight-color: transparent;
+
+  -webkit-text-size-adjust: 100%;
+
+  text-size-adjust: 100%;
+
+  cursor: default;
+
+  line-height: 1.5;
+
+  overflow-wrap: break-word;
+
+  word-break: break-word;
+
+  tab-size: 4;
+
+  --color-ground: #fff;
+
+  --color-surface: #fff;
+
+  --color-surface-hi: #f5f5f5;
+
+  --color-surface-warm: #faf6f2;
+
+  --color-line: #e3e3e3;
+
+  --color-line-lit: #8a8a8a;
+
+  --color-ink: #333;
+
+  --color-ink-soft: #666;
+
+  --color-ground-soft: #a3a3a3;
+
+  --color-accent-ink: #b23c0e;
+
+  --font-sans: 'Pretendard', 'Noto Sans KR', ui-sans-serif, system-ui,
+    sans-serif;
+
+  --font-display: var(--font-sans);
+
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+
+  --text-sm: 1.4rem;
+
+  --text-base: 1.7rem;
+
+  --text-lg: 1.8rem;
+
+  --text-2xl: 2.4rem;
+
+  --text-3xl: 3rem;
+
+  --text-display: clamp(3.6rem, 5vw, 6.4rem);
+
+  --text-headline: clamp(2.6rem, 2.8vw, 3.6rem);
+
+  --text-title: clamp(2rem, 1.9vw, 2.4rem);
+
+  --app-max: 176rem;
+
+  --page-pad-x: 5.6rem;
+
+  --radius-sm: 0.4rem;
+
   --dur: 0.15s;
+
   --dur-slow: 0.5s;
+
   --ease: cubic-bezier(0.4, 0, 0.2, 1);
+
   --ease-rise: cubic-bezier(0.22, 1, 0.36, 1);
 
   color-scheme: light;
-}
-
-@media (min-width: 640px) {
-  :root {
-    --page-pad-x: 3.2rem; /* 32px */
-  }
-}
-
-@media (min-width: 1024px) {
-  :root {
-    --page-pad-x: 5.6rem; /* 56px */
-  }
 }
 
 /* --------------------------------------------------------------------------
    기본 요소 보정 (레거시 리셋 위에 덮어씁니다)
    -------------------------------------------------------------------------- */
 body {
+  margin: 0;
+  padding: 0;
   font-family: var(--font-sans);
-  font-size: var(--text-base);
   line-height: 1.65;
+  font-size: var(--text-base);
   color: var(--color-ink);
   background: var(--color-ground);
   word-break: keep-all;
@@ -439,11 +448,14 @@ body {
 }
 
 p {
+  margin: 0;
+  padding: 0;
   word-break: keep-all;
 }
 
 a {
   color: inherit;
+  text-decoration: none;
 }
 
 :focus-visible {
@@ -459,7 +471,6 @@ a {
 .app-shell {
   display: flex;
   flex-direction: column;
-  min-height: 100vh;
   min-height: 100dvh;
   background: var(--color-ground);
   color: var(--color-ink);
@@ -486,13 +497,7 @@ a {
 
 /* 스크롤 앵커 보정 (sticky 헤더 높이) */
 .scroll-anchor {
-  scroll-margin-top: 8rem;
-}
-
-@media (min-width: 1024px) {
-  .scroll-anchor {
-    scroll-margin-top: 9.6rem;
-  }
+  scroll-margin-top: 9.6rem;
 }
 
 .visually-hidden {
@@ -615,5 +620,45 @@ a {
   .reveal,
   .skeleton {
     animation: none;
+  }
+}
+
+.animate-rise,.reveal,.skeleton{
+}
+
+/* ==========================================================================
+   데스크톱 우선(max-width) 규칙
+   위의 기본 규칙에는 PC(넓은 화면) 값이 들어 있고, 여기서 좁은 화면 값을 덮어씁니다.
+     · (max-width: 1600px) → 1024~1600px 구간 (html 글자 크기 9px)
+     · (max-width: 1023px) → 768~1023px 구간
+     · (max-width: 767px)  → 640~767px 구간 (html 글자 크기 12px)
+     · (max-width: 639px)  → 639px 이하 (html 글자 크기 12px)
+   ========================================================================== */
+@media (max-width: 1600px) {
+
+  html {
+    font-size: 9px;
+  }
+}
+@media (max-width: 1023px) {
+
+  :root {
+    --page-pad-x: 3.2rem;
+  }
+
+  .scroll-anchor {
+    scroll-margin-top: 8rem;
+  }
+}
+@media (max-width: 767px) {
+
+  html {
+    font-size: 12px;
+  }
+}
+@media (max-width: 639px) {
+
+  :root {
+    --page-pad-x: 2rem;
   }
 }

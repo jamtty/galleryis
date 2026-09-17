@@ -1140,6 +1140,7 @@ select.adm_btn_secondary {
   gap: 0.4rem;
 }
 .adm_page_btn {
+  flex-shrink: 0;
   width: 3.2rem;
   height: 3.2rem;
   border: 1px solid #d1d5db;
@@ -1918,4 +1919,27 @@ select.adm_btn_secondary {
   .adm_lightbox_name {
     max-width: 22rem;
   }
+}
+
+/* --------------------------------------------------------------------------
+ * flex-shrink 보상
+ * common.css 의 전역 `flex-shrink: 0` 을 뺐습니다(글자가 줄바꿈되도록).
+ * 그 대신 고정 크기 UI 요소는 여기서 다시 고정해 원래 레이아웃을 유지합니다.
+ * ------------------------------------------------------------------------ */
+.adm_sidebar,
+.adm_logo,
+.btn_admin_login,
+.adm_btn_primary,
+.adm_btn_secondary,
+.adm_btn_edit,
+.adm_btn_copy,
+.adm_btn_delete,
+.adm_notice_tag,
+.adm_badge_on,
+.adm_badge_off,
+.adm_badge_current,
+.adm_badge_upcoming,
+.adm_badge_past,
+.adm_cal_cell {
+  flex-shrink: 0;
 }
