@@ -7,6 +7,8 @@ export const PATHS = {
   exhibitions: '/exhibitions',
   exhibitionDetail: '/exhibitions/:id',
   halls: '/halls',
+  /** 전시장 3D 둘러보기 — 규모로 방을 만들고 사진을 벽에 붙여 둘러봅니다. */
+  hallStudio: '/halls/:key/studio',
   rental: '/rental',
   /** 대관 신청서 작성 — /rental 에서 전시장·기간을 골라 넘어옵니다. */
   rentalApply: '/rental/apply',
@@ -35,6 +37,10 @@ export const PATHS = {
   adminNoticeForm: '/admin/notices/write',
   /** 관리자 — 공지 수정 (목록의 [상세]) */
   adminNoticeEdit: '/admin/notices/edit/:id',
+  /** 관리자 — 전시장 관리 (4개 고정 · 수정만) */
+  adminHalls: '/admin/halls',
+  /** 관리자 — 전시장 수정 */
+  adminHallEdit: '/admin/halls/edit/:id',
   adminPopups: '/admin/popups',
   /** 관리자 — 팝업 등록 */
   adminPopupForm: '/admin/popups/write',
@@ -69,6 +75,7 @@ export const ADMIN_MENU_SECTIONS: readonly AdminMenuSection[] = [
       { to: PATHS.adminRentals, label: '대관 신청', icon: 'mail' },
       { to: PATHS.adminSchedule, label: '대관 일정', icon: 'calendar_today' },
       { to: PATHS.adminExhibitions, label: '작품전시', icon: 'image' },
+      { to: PATHS.adminHalls, label: '전시장', icon: 'apartment' },
       { to: PATHS.adminNotices, label: '공지', icon: 'campaign' },
       { to: PATHS.adminPopups, label: '팝업', icon: 'web_asset' },
     ],

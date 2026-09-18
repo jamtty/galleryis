@@ -21,9 +21,11 @@ function ViewAll() {
   )
 }
 
-/** 홈 화면에 보여 줄 전시 건수 */
-const HOME_CURRENT_COUNT = 8
-const HOME_UPCOMING_COUNT = 4
+/** 상단 슬라이더에 올릴 현재 전시 건수 */
+const HOME_HERO_COUNT = 8
+
+/** 현재 전시 · 예정 전시 칸에 보여 줄 건수 (한 줄에 나란히 2개씩) */
+const HOME_EXHIBITION_COUNT = 2
 
 /** 홈 화면에 보여 줄 소식 건수 */
 const HOME_NOTICE_COUNT = 5
@@ -39,7 +41,7 @@ export default function HomePage() {
   useEffect(() => {
     let cancelled = false
 
-    fetchPublicExhibitionList({ status: 'current', page: 1, size: HOME_CURRENT_COUNT })
+    fetchPublicExhibitionList({ status: 'current', page: 1, size: HOME_HERO_COUNT })
       .then((res) => {
         if (!cancelled) setCurrent(res.items)
       })
@@ -48,7 +50,7 @@ export default function HomePage() {
         if (!cancelled) setCurrent([])
       })
 
-    fetchPublicExhibitionList({ status: 'upcoming', page: 1, size: HOME_UPCOMING_COUNT })
+    fetchPublicExhibitionList({ status: 'upcoming', page: 1, size: HOME_EXHIBITION_COUNT })
       .then((res) => {
         if (!cancelled) setUpcoming(res.items)
       })
@@ -83,34 +85,38 @@ export default function HomePage() {
       {/* 현재 전시 슬라이더 */}
       <HeroSlider items={current ?? []} />
 
-      {/* 현재 전시 */}
-      <section id="exhibitions" className="section section--hero scroll-anchor">
-        <SectionHead title="현재 전시">
-          <Link to={PATHS.exhibitions} className="section-head__action">
-            <ViewAll />
-          </Link>
-        </SectionHead>
-        <ExhibitionGrid
-          items={current ?? []}
-          emptyText="현재 전시가 없습니다."
-        />
-      </section>
+      {/* 현재 전시 · 예정 전시 — 한 줄에 나란히, 각 2개 */}
+      <div className="home-exhibitions">
+        <section
+          id="exhibitions"
+          className="home-exhibitions__col scroll-anchor"
+        >
+          <SectionHead title="현재 전시">
+            <Link to={PATHS.exhibitions} className="section-head__action">
+              <ViewAll />
+            </Link>
+          </SectionHead>
+          <ExhibitionGrid
+            items={(current ?? []).slice(0, HOME_EXHIBITION_COUNT)}
+            emptyText="현재 전시가 없습니다."
+          />
+        </section>
 
-      {/* 예정 전시 */}
-      <section className="section section--plain">
-        <SectionHead title="예정 전시">
-          <Link
-            to={`${PATHS.exhibitions}?status=upcoming`}
-            className="section-head__action"
-          >
-            <ViewAll />
-          </Link>
-        </SectionHead>
-        <ExhibitionGrid
-          items={upcoming ?? []}
-          emptyText="예정된 전시가 아직 없습니다."
-        />
-      </section>
+        <section className="home-exhibitions__col">
+          <SectionHead title="예정 전시">
+            <Link
+              to={`${PATHS.exhibitions}?status=upcoming`}
+              className="section-head__action"
+            >
+              <ViewAll />
+            </Link>
+          </SectionHead>
+          <ExhibitionGrid
+            items={upcoming ?? []}
+            emptyText="예정된 전시가 아직 없습니다."
+          />
+        </section>
+      </div>
 
       {/* 소식 */}
       <section id="notices" className="section section--notices scroll-anchor">

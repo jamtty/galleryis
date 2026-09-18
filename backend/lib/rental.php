@@ -308,6 +308,27 @@ function rental_week_start(DateTimeImmutable $date)
 }
 
 /**
+ * 대관 표의 첫 주 (00:00)
+ *
+ * 오늘이 속한 주는 이미 시작했으므로 건너뜁니다.
+ *   오늘이 수요일  → 오늘부터 (그 주는 아직 시작 전과 같음)
+ *   오늘이 목~화  → 다음 주 수요일부터
+ *
+ * @return DateTimeImmutable
+ */
+function rental_first_week_start()
+{
+    $today = new DateTimeImmutable('today');
+    $start = rental_week_start($today);
+
+    if ($start < $today) {
+        $start = $start->modify('+' . RENTAL_WEEK_DAYS . ' days');
+    }
+
+    return $start;
+}
+
+/**
  * 페이지 번호 → 주 목록
  *
  * @param int $page 0부터 시작
@@ -315,8 +336,7 @@ function rental_week_start(DateTimeImmutable $date)
  */
 function rental_weeks_for_page($page)
 {
-    $today = new DateTimeImmutable('today');
-    $base = rental_week_start($today);
+    $base = rental_first_week_start();
     $offset = max(0, (int) $page) * RENTAL_WEEKS_PER_PAGE * RENTAL_WEEK_DAYS;
 
     $weeks = [];
@@ -370,7 +390,7 @@ function rental_unit_exists($unit)
 }
 
 /**
- * 기간 단위 → 주 목록 (이번 주부터)
+ * 기간 단위 → 주 목록 (아직 시작하지 않은 주부터)
  *
  * RENTAL_YEAR_LIMIT 를 넘어가면 거기서 멈춥니다.
  *
@@ -385,7 +405,7 @@ function rental_weeks_for_unit($unit)
         return [];
     }
 
-    $base = rental_week_start(new DateTimeImmutable('today'));
+    $base = rental_first_week_start();
     $weeks = [];
 
     for ($i = 0; $i < $units[$unit]['weeks']; $i++) {
@@ -432,8 +452,12 @@ function rental_range_info(array $weeks)
 /**
  * 주 목록별·전시장별 대관 상태
  *
+ * 상태와 함께 그 주를 차지한 신청서 번호(wr_id)를 돌려줍니다.
+ * 관리자 대관 일정에서 칸을 누르면 신청서 수정 화면으로 갈 수 있게 하기 위함입니다.
+ * (예약이 없으면 id 는 0)
+ *
  * @param array $weeks
- * @return array<int, array{start: string, end: string, halls: array<string, string>}>
+ * @return array<int, array{start: string, end: string, halls: array<string, array{status: string, id: int}>}>
  */
 function rental_availability(array $weeks)
 {
@@ -446,7 +470,7 @@ function rental_availability(array $weeks)
     $fromTs = $first->getTimestamp();
     $toTs = $last->setTime(23, 59, 59)->getTimestamp();
 
-    $sql = 'SELECT wr_8, wr_11, wr_12, wr_13 FROM ' . RENTAL_TABLE
+    $sql = 'SELECT wr_id, wr_8, wr_11, wr_12, wr_13 FROM ' . RENTAL_TABLE
         . ' WHERE wr_is_comment = 0'
         . ' AND wr_11 <> "" AND wr_12 <> ""'
         . ' AND CAST(wr_11 AS UNSIGNED) <= ?'
@@ -466,6 +490,7 @@ function rental_availability(array $weeks)
         }
 
         $byHall[$hallId][] = [
+            'id' => (int) $row['wr_id'],
             'start' => (int) $row['wr_11'],
             'end' => (int) $row['wr_12'],
             'status' => ((string) $row['wr_13'] === '2') ? 'approved' : 'pending',
@@ -484,6 +509,7 @@ function rental_availability(array $weeks)
 
         foreach (array_keys(rental_halls()) as $hallId) {
             $status = 'available';
+            $bookingId = 0;
 
             foreach (isset($byHall[$hallId]) ? $byHall[$hallId] : [] as $booking) {
                 if ($booking['start'] > $weekEndTs || $booking['end'] < $weekStartTs) {
@@ -492,13 +518,15 @@ function rental_availability(array $weeks)
 
                 if ($booking['status'] === 'approved') {
                     $status = 'approved';
+                    $bookingId = $booking['id'];
                     break;
                 }
 
                 $status = 'pending';
+                $bookingId = $booking['id'];
             }
 
-            $halls[$hallId] = $status;
+            $halls[$hallId] = ['status' => $status, 'id' => $bookingId];
         }
 
         $result[] = [
@@ -1172,6 +1200,28 @@ function rental_set_checked(array $ids, $checked)
         . ' WHERE wr_id IN (' . $placeholders . ')'
     );
     $stmt->execute(array_merge($values, $ids));
+
+    return $stmt->rowCount();
+}
+
+/**
+ * 대관 상태 설정 (심사중 / 대관완료)
+ *
+ * wr_13 = '1'(심사중) / '2'(대관완료) — 대관 일정 표의 칸 색과 공개 화면이 이 값을 씁니다.
+ * (euc-kr 테이블이라 숫자만 넣습니다)
+ *
+ * @param int    $wrId
+ * @param string $status 'pending' | 'approved'
+ * @return int 바뀐 건수
+ */
+function rental_set_status($wrId, $status)
+{
+    $value = $status === 'approved' ? '2' : '1';
+
+    $stmt = db()->prepare(
+        'UPDATE ' . RENTAL_TABLE . ' SET wr_13 = ? WHERE wr_id = ?'
+    );
+    $stmt->execute([$value, (int) $wrId]);
 
     return $stmt->rowCount();
 }

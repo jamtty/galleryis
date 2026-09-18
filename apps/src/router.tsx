@@ -1,5 +1,6 @@
 import { Navigate, createBrowserRouter } from 'react-router-dom'
 import Layout from './components/Layout'
+import HallStudioRoute from './components/HallStudioRoute'
 import RequireAdmin from './components/admin/RequireAdmin'
 import AboutPage from './pages/AboutPage'
 import ExhibitionDetailPage from './pages/ExhibitionDetailPage'
@@ -15,6 +16,8 @@ import RentalPage from './pages/RentalPage'
 import VisitPage from './pages/VisitPage'
 import AdminExhibitionFormPage from './pages/admin/AdminExhibitionFormPage'
 import AdminExhibitionPage from './pages/admin/AdminExhibitionPage'
+import AdminHallFormPage from './pages/admin/AdminHallFormPage'
+import AdminHallPage from './pages/admin/AdminHallPage'
 import AdminLoginPage from './pages/admin/AdminLoginPage'
 import AdminMyPage from './pages/admin/AdminMyPage'
 import AdminNoticeFormPage from './pages/admin/AdminNoticeFormPage'
@@ -40,6 +43,10 @@ export const router = createBrowserRouter([
       { path: PATHS.exhibitions, element: <ExhibitionsPage /> },
       { path: PATHS.exhibitionDetail, element: <ExhibitionDetailPage /> },
       { path: PATHS.halls, element: <HallsPage /> },
+      {
+        path: PATHS.hallStudio,
+        element: <HallStudioRoute />,
+      },
       { path: PATHS.rental, element: <RentalPage /> },
       { path: PATHS.rentalApply, element: <RentalApplyPage /> },
       { path: PATHS.about, element: <AboutPage /> },
@@ -69,6 +76,8 @@ export const router = createBrowserRouter([
           { path: 'exhibitions', element: <AdminExhibitionPage /> },
           { path: 'exhibitions/write', element: <AdminExhibitionFormPage /> },
           { path: 'exhibitions/edit/:id', element: <AdminExhibitionFormPage /> },
+          { path: 'halls', element: <AdminHallPage /> },
+          { path: 'halls/edit/:id', element: <AdminHallFormPage /> },
           { path: 'notices', element: <AdminNoticePage /> },
           { path: 'notices/write', element: <AdminNoticeFormPage /> },
           { path: 'notices/edit/:id', element: <AdminNoticeFormPage /> },

@@ -73,10 +73,27 @@ export const RENTAL_STATUS_LABELS: Record<RentalStatus, string> = {
   approved: '대관완료',
 }
 
+/**
+ * 관리자가 고를 수 있는 대관 상태 — '신청가능' 은 신청이 없다는 뜻이라 뺐습니다.
+ * (대관 신청서 수정 화면의 박스 라디오버튼)
+ */
+export const RENTAL_STATUS_CHOICES = [
+  { value: 'pending', label: '심사중' },
+  { value: 'approved', label: '대관완료' },
+] as const
+
+export type RentalStatusChoice = (typeof RENTAL_STATUS_CHOICES)[number]['value']
+
+export type RentalWeekHall = {
+  status: RentalStatus
+  /** 그 주를 차지한 신청서 wr_id (예약이 없으면 0) — 관리자 일정에서 신청서로 갑니다. */
+  id: number
+}
+
 export type RentalWeek = {
   start: string
   end: string
-  halls: Record<string, RentalStatus>
+  halls: Record<string, RentalWeekHall>
 }
 
 export type AvailabilityResponse = {
@@ -290,6 +307,18 @@ export function setRentalChecked(ids: number[], checked: boolean) {
   return apiRequest<{ updated: number; checked: boolean }>(
     '/api/rentals/check.php',
     { method: 'POST', body: { ids, checked } },
+  )
+}
+
+/**
+ * 대관 상태 바꾸기 (심사중 / 대관완료)
+ *
+ * 대관 일정 표의 칸 색과 예약 여부가 이 값으로 정해집니다.
+ */
+export function setRentalStatus(id: number, status: RentalStatusChoice) {
+  return apiRequest<{ id: number; status: RentalStatusChoice; updated: number }>(
+    '/api/rentals/status.php',
+    { method: 'POST', body: { id, status } },
   )
 }
 

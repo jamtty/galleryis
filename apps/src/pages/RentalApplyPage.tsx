@@ -4,17 +4,17 @@ import { RENTAL_HALLS } from '@/api/rentals'
 import PageHeader from '@/components/PageHeader'
 import RentalForm from '@/components/rental/RentalForm'
 import { PATHS } from '@/routes/paths'
+import { toIsoDate } from '@/utils/date'
 
 const YMD = /^\d{4}-\d{2}-\d{2}$/
 
 /** 수요일 시작일 기준 종료일(다음 주 화요일) */
 function weekEndOf(weekStart: string) {
   const date = new Date(`${weekStart}T00:00:00`)
+
   date.setDate(date.getDate() + 6)
 
-  const month = String(date.getMonth() + 1).padStart(2, '0')
-  const day = String(date.getDate()).padStart(2, '0')
-  return `${date.getFullYear()}-${month}-${day}`
+  return toIsoDate(date)
 }
 
 /**

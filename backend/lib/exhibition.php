@@ -1067,6 +1067,9 @@ function exhibition_public_list(array $query)
  */
 function exhibition_public_detail($exId)
 {
+    // 상세 주소로 바로 들어온 경우에도 분류를 오늘 날짜 기준으로 맞춥니다.
+    exhibition_sync_statuses();
+
     $stmt = db()->prepare('SELECT * FROM ' . EXHIBITION_TABLE . ' WHERE ex_id = ?');
     $stmt->execute([(int) $exId]);
     $row = $stmt->fetch();

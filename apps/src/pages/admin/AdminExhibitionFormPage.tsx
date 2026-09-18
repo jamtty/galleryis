@@ -3,14 +3,14 @@ import type { FormEvent } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import {
   EXHIBITION_FILE_LIMIT,
-  EXHIBITION_REGISTERED_STATUSES,
+  EXHIBITION_STATUSES,
   EXHIBITION_USE_OPTIONS,
   createExhibition,
   fetchExhibitionDetail,
   updateExhibition,
   uploadEditorImage,
   type ExhibitionFile,
-  type ExhibitionRegisteredStatus,
+  type ExhibitionStatus,
   type ExhibitionUse,
 } from '@/api/exhibitions'
 import AdminAlert from '@/components/admin/AdminAlert'
@@ -19,6 +19,12 @@ import ArtworkDropzone from '@/components/admin/ArtworkDropzone'
 import DatePicker from '@/components/admin/DatePicker'
 import RichEditor from '@/components/admin/RichEditor'
 import { PATHS } from '@/routes/paths'
+import { todayIso } from '@/utils/date'
+
+/** 분류 값 → 라벨 (api/exhibitions.ts 의 정의를 그대로 씁니다) */
+const STATUS_LABEL = Object.fromEntries(
+  EXHIBITION_STATUSES.map((item) => [item.value, item.label]),
+) as Record<ExhibitionStatus, string>
 
 /**
  * 관리자 — 전시 등록 / 수정.
@@ -37,7 +43,6 @@ export default function AdminExhibitionFormPage() {
   const isEdit = Number.isInteger(editId) && editId > 0
 
   const [title, setTitle] = useState('')
-  const [status, setStatus] = useState<ExhibitionRegisteredStatus>('current')
   const [startDate, setStartDate] = useState('')
   const [endDate, setEndDate] = useState('')
   const [place, setPlace] = useState('')
@@ -71,8 +76,6 @@ export default function AdminExhibitionFormPage() {
         if (cancelled) return
 
         setTitle(res.title)
-        // 지난전시는 날짜로 자동 분류된 값이라 등록 분류에 없습니다.
-        setStatus(res.status === 'upcoming' ? 'upcoming' : 'current')
         setStartDate(res.startDate)
         setEndDate(res.endDate)
         setPlace(res.place)
@@ -95,6 +98,31 @@ export default function AdminExhibitionFormPage() {
       cancelled = true
     }
   }, [editId, isEdit])
+
+  /** 오늘 날짜 — 기간과 비교해 분류를 미리 보여 줍니다. (실제 저장은 서버가 DB 날짜로 판단) */
+  const today = todayIso()
+
+  /**
+   * 기간으로 자동 결정되는 분류.
+   *
+   * 서버도 저장 직후 같은 규칙으로 다시 잡으므로, 폼에서 고르는 값이 아닙니다.
+   *   오늘 > 종료일 → past(지난전시) · 오늘 < 시작일 → upcoming(예정전시) · 그 외 → current(현재전시)
+   */
+  const autoStatus: ExhibitionStatus | null =
+    startDate === '' || endDate === '' || startDate > endDate
+      ? null
+      : endDate < today
+        ? 'past'
+        : startDate > today
+          ? 'upcoming'
+          : 'current'
+
+  const autoStatusNote =
+    autoStatus === 'past'
+      ? '종료일이 지나 지난전시로 분류됩니다.'
+      : autoStatus === 'upcoming'
+        ? '시작일이 되면 현재전시로 자동 변경됩니다.'
+        : '기간 안에 있어 현재전시로 분류됩니다.'
 
   const handleSubmit = async (event: FormEvent) => {
     event.preventDefault()
@@ -129,7 +157,9 @@ export default function AdminExhibitionFormPage() {
 
     const input = {
       title: title.trim(),
-      status,
+      // 분류는 서버가 저장 직후 기간으로 다시 잡습니다.
+      // (past 는 등록 분류에 없어서 current 로 보내면 서버가 곧바로 지난전시로 정정합니다)
+      status: autoStatus === 'upcoming' ? ('upcoming' as const) : ('current' as const),
       place: place.trim(),
       artist: artist.trim(),
       start_date: startDate,
@@ -214,38 +244,28 @@ export default function AdminExhibitionFormPage() {
         {error && <p className="adm_table_notice">{error}</p>}
 
         <form className="adm_form" onSubmit={handleSubmit} noValidate>
-          {/* 분류 */}
+          {/* 분류 — 기간으로 자동 결정됩니다 (고르는 값이 아니라 결과만 보여 줍니다) */}
           <div className="adm_form_row">
-            <span className="adm_form_label">
-              분류 <span className="required">*</span>
-            </span>
+            <span className="adm_form_label">분류</span>
             <div className="adm_radio_field">
-              <div className="adm_radio_cards" role="radiogroup" aria-label="분류">
-                {EXHIBITION_REGISTERED_STATUSES.map((item) => (
-                  <label
-                    key={item.value}
-                    className={
-                      status === item.value
-                        ? 'adm_radio_card is-selected'
-                        : 'adm_radio_card'
-                    }
-                  >
-                    <input
-                      type="radio"
-                      name="ex_status"
-                      value={item.value}
-                      checked={status === item.value}
-                      disabled={saving}
-                      onChange={() => setStatus(item.value)}
-                    />
-                    <span>{item.label}</span>
-                  </label>
-                ))}
-              </div>
+              <p className="adm_auto_status" aria-live="polite">
+                {autoStatus === null ? (
+                  <span className="adm_auto_status_empty">
+                    전시기간을 선택하면 자동으로 정해집니다.
+                  </span>
+                ) : (
+                  <>
+                    <span className={`adm_badge_${autoStatus}`}>
+                      {STATUS_LABEL[autoStatus]}
+                    </span>
+                    <span className="adm_auto_status_note">{autoStatusNote}</span>
+                  </>
+                )}
+              </p>
 
               <p className="adm_input_hint">
-                전시 시작일이 되면 현재전시로, 종료일이 지나면 지난전시로 자동
-                분류됩니다.
+                분류는 전시기간으로 자동 결정됩니다. (시작일이 되면 현재전시,
+                종료일이 지나면 지난전시)
               </p>
             </div>
           </div>

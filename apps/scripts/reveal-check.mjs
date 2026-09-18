@@ -16,12 +16,18 @@
  *   --port 1212        개발 서버 포트
  *   --debug            위반 요소를 전부 출력
  *   --keep             끝나고 브라우저를 닫지 않음 (직접 열어 보려고 할 때)
- *   --shot 결과.png     화면을 맨 위·중간에서 찍어 저장 (팝업은 닫고 찍음, --path/--ratio 로 대상·위치 지정)
+ *   --shot 결과.png     화면을 찍고 바로 끝남 (팝업은 닫고 찍음)
  *   --ratio 0.45       --shot 의 두 번째 사진을 찍을 스크롤 위치 (0~1)
- *   --eval "식"         페이지에서 식을 하나 실행하고 값만 출력 (--path 로 페이지 지정, 점검은 건너뜀)
+ *   --eval "식"         페이지에서 식을 하나 실행하고 값만 출력 (점검은 건너뜀)
+ *   --path /주소        --shot · --eval 이 열 페이지 (기본 '/')
+ *   --login            .env.test.local 관리자 계정으로 로그인해 관리자 화면도 볼 수 있게 함
+ *   --width 375        뷰포트 너비 (기본 1440) — 모바일 레이아웃 확인용
+ *   --height 812       뷰포트 높이 (기본 900)
+ *   --mobile           모바일 기기로 봅니다 (터치 + 배율 2)
+ *   --click "선택자"     --shot 전에 그 요소를 한 번 누릅니다 (서랍 펼친 모습 등)
  */
 import { spawn } from 'node:child_process'
-import { existsSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs'
+import { existsSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 
@@ -40,6 +46,20 @@ const KEEP = argv.includes('--keep')
 const SHOT = arg('--shot', '')
 /** --eval "식" — 페이지에서 식을 하나 실행하고 값만 출력합니다 (디버깅용). */
 const EVAL = arg('--eval', '')
+/** --path /주소 — --shot · --eval 이 열 페이지 (http 로 시작하면 그 주소 그대로 — 원본 사이트 비교용) */
+const PATH_ARG = arg('--path', '/')
+
+/** 페이지 주소 만들기 (절대 주소면 그대로) */
+const urlFor = (path) => (path.startsWith('http') ? path : `${BASE}${path}`)
+/** --login — 관리자 계정으로 로그인해 관리자 화면도 볼 수 있게 합니다 */
+const LOGIN = argv.includes('--login')
+/** --width / --height — 뷰포트 크기 (모바일 레이아웃 확인) */
+const VIEW_WIDTH = Number(arg('--width', 1440))
+const VIEW_HEIGHT = Number(arg('--height', 900))
+/** --mobile — 터치 + 배율 2 로 모바일 기기처럼 */
+const MOBILE = argv.includes('--mobile')
+/** --click "선택자" — --shot 전에 눌러 볼 요소 (서랍 펼치기 등) */
+const CLICK = arg('--click', '')
 const DEBUG_PORT = 9333
 /** ScrollTrigger 의 start 와 같은 기준 — 이 선을 넘어야 등장합니다. */
 const START_RATIO = 0.88
@@ -88,8 +108,9 @@ const chrome = spawn(
     '--no-default-browser-check',
     '--disable-extensions',
     '--disable-background-networking',
-    '--window-size=1440,900',
-    '--force-device-scale-factor=1',
+    // 헤드리스에는 GPU 가 없어 소프트웨어 렌더러로 WebGL 을 씁니다 (3D 둘러보기 확인용)
+    '--enable-unsafe-swiftshader',
+    '--window-size=1440,900',    '--force-device-scale-factor=1',
     'about:blank',
   ],
   { stdio: 'ignore' },
@@ -189,6 +210,14 @@ const send = (method, params) => browser.send(method, params, sessionId)
 await send('Page.enable')
 await send('Runtime.enable')
 
+// 뷰포트 크기 (--width/--height/--mobile) — CSS 미디어 쿼리가 이 폭을 봅니다.
+await send('Emulation.setDeviceMetricsOverride', {
+  width: VIEW_WIDTH,
+  height: VIEW_HEIGHT,
+  deviceScaleFactor: MOBILE ? 2 : 1,
+  mobile: MOBILE,
+})
+
 /** 페이지에서 식을 실행하고 값을 돌려받습니다. */
 async function evaluate(expression) {
   const result = await send('Runtime.evaluate', {
@@ -225,13 +254,115 @@ const shutdown = () => {
   stopBrowser()
 }
 
+/** 화면을 한 장 저장합니다. */
+async function captureScreenshot(file) {
+  const { data } = await send('Page.captureScreenshot', { format: 'png' })
+
+  writeFileSync(file, Buffer.from(data, 'base64'))
+  console.log(`스크린샷: ${file}`)
+}
+
+/** .env 형태 파일을 읽습니다. (값을 그대로 출력하지는 않습니다) */
+function readEnvFile(file) {
+  const map = {}
+
+  if (!existsSync(file)) return map
+
+  for (const line of readFileSync(file, 'utf8').replace(/^\uFEFF/, '').split(/\r?\n/)) {
+    const trimmed = line.trim()
+
+    if (!trimmed || trimmed.startsWith('#')) continue
+
+    const eq = trimmed.indexOf('=')
+
+    if (eq <= 0) continue
+
+    map[trimmed.slice(0, eq).trim()] = trimmed.slice(eq + 1).trim().replace(/^["']|["']$/g, '')
+  }
+
+  return map
+}
+
+/**
+ * 관리자 화면을 보기 위해 로그인 토큰을 브라우저 저장소에 넣습니다.
+ * 자격증명은 apps/.env.test.local 에서 읽으므로 명령줄에 남지 않습니다.
+ */
+async function signIn() {
+  const envDir = join(import.meta.dirname, '..')
+  const local = readEnvFile(join(envDir, '.env.test.local'))
+  const devEnv = readEnvFile(join(envDir, '.env.development.local'))
+
+  // 개발 서버가 쓰는 API 주소 (운영 빌드면 같은 출처의 /backend)
+  const api = String(devEnv.VITE_API_BASE ?? '/backend').replace(/\/+$/, '')
+  const apiUrl = api.startsWith('http') ? api : `${BASE}${api}`
+
+  const res = await fetch(`${apiUrl}/api/auth/login.php`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+    body: JSON.stringify({ id: local.NOTICE_TEST_ID ?? '', password: local.NOTICE_TEST_PW ?? '' }),
+    signal: AbortSignal.timeout(15000),
+  })
+
+  const json = await res.json().catch(() => null)
+
+  if (!json?.data?.token) {
+    throw new Error(`관리자 로그인에 실패했습니다. (HTTP ${res.status} ${json?.message ?? ''})`)
+  }
+
+  const auth = {
+    accessToken: json.data.token,
+    expiresAt: json.data.expiresAt ?? null,
+    user: json.data.user,
+  }
+
+  // 앱과 같은 출처에서 저장소를 채운 뒤 대상 페이지로 이동해야 합니다.
+  await send('Page.navigate', { url: `${BASE}/` })
+  await waitFor("!!document.querySelector('.app-shell')")
+  await evaluate(`localStorage.setItem('galleryis.admin.auth', ${JSON.stringify(JSON.stringify(auth))})`)
+
+  console.log(`관리자 로그인 완료 (${auth.user?.id ?? '?'}) — 브라우저 저장소에 토큰을 넣었습니다.`)
+}
+
+if (LOGIN) await signIn()
+
 /* --eval "식" — 페이지에서 식을 하나 실행하고 값만 보고 끝냅니다 (디버깅용) */
 if (EVAL) {
-  await send('Page.navigate', { url: `${BASE}${arg('--path', '/')}` })
-  await waitFor("!!document.querySelector('.app-shell')")
+  await send('Page.navigate', { url: urlFor(PATH_ARG) })
+  await waitFor("!!document.querySelector('.app-shell') || !!document.body")
   await sleep(2500)
 
   console.log(JSON.stringify(await evaluate(EVAL), null, 2))
+  shutdown()
+  process.exit(0)
+}
+
+/* --shot 결과.png — 화면을 찍고 바로 끝냅니다 (보통 --path 와 함께) */
+if (SHOT) {
+  await send('Page.navigate', { url: urlFor(PATH_ARG) })
+  await waitFor("!!document.querySelector('.app-shell') || !!document.body")
+  await sleep(2500)
+
+  // 팝업이 화면을 가리면 확인이 어려우니 닫아 둡니다.
+  await evaluate("document.querySelector('.popup_close_btn')?.click()")
+  await sleep(300)
+
+  // --click "선택자" — 눌러서 펼친 상태를 찍습니다.
+  if (CLICK) {
+    await evaluate(`document.querySelector(${JSON.stringify(CLICK)})?.click()`)
+    await sleep(600)
+  }
+
+  await captureScreenshot(SHOT)
+
+  await scrollTo(
+    await evaluate(
+      `(document.documentElement.scrollHeight - window.innerHeight) * ${Number(arg('--ratio', 0.45))}`,
+    ),
+  )
+  // 지연 로딩(loading=lazy) 이미지와 progressive JPEG 이 다 그려질 때까지
+  await sleep(2500)
+  await captureScreenshot(SHOT.replace(/\.png$/i, '-scrolled.png'))
+
   shutdown()
   process.exit(0)
 }
@@ -430,34 +561,6 @@ await send('Emulation.setEmulatedMedia', { features: [] })
 /* --------------------------------------------------------------------------
  * 결과
  * ------------------------------------------------------------------------ */
-async function captureScreenshot(file) {
-  const { data } = await send('Page.captureScreenshot', { format: 'png' })
-
-  writeFileSync(file, Buffer.from(data, 'base64'))
-  console.log(`스크린샷: ${file}`)
-}
-
-if (SHOT) {
-  await send('Page.navigate', { url: `${BASE}${arg('--path', '/')}` })
-  await waitFor("!!document.querySelector('.app-shell')")
-  await sleep(1500)
-
-  // 팝업이 화면을 가리면 확인이 어려우니 닫아 둡니다.
-  await evaluate("document.querySelector('.popup_close_btn')?.click()")
-  await sleep(300)
-
-  await captureScreenshot(SHOT)
-
-  await scrollTo(
-    await evaluate(
-      `(document.documentElement.scrollHeight - window.innerHeight) * ${Number(arg('--ratio', 0.45))}`,
-    ),
-  )
-  // 지연 로딩(loading=lazy) 이미지와 progressive JPEG 이 다 그려질 때까지
-  await sleep(3000)
-  await captureScreenshot(SHOT.replace(/\.png$/i, '-scrolled.png'))
-}
-
 console.log('')
 console.log('스크롤 등장 효과 점검 (GSAP ScrollTrigger)')
 console.log('='.repeat(72))

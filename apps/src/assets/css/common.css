@@ -126,12 +126,6 @@ html {
   font-size: 10px; }
 
 html,
-body {
-}
-body {
-  
-}
-html,
 h1,
 h2,
 h3,
@@ -205,11 +199,8 @@ button {
 input[type='submit'] {
   cursor: pointer;
 }
-button {
-}
 
-table {
-}
+hr,
 td {
   padding: 0;
 }
@@ -224,15 +215,11 @@ textarea {
 select {
   margin: 0;
 }
-p {
-}
 hr {
   display: none;
 }
 pre {
   overflow-x: scroll;
-}
-a {
 }
 
 table caption {
@@ -245,11 +232,6 @@ table caption {
   border: 0;
   clip: rect(0, 0, 0, 0);
 }
-*,
-:after,
-:before {
-}
-
 .sr_only,
 .skip_nav {
   position: absolute;
@@ -301,8 +283,6 @@ img {
  * (소식 목록 제목, 안내 목록 내용 등)
  * → 고정 크기 요소(버튼·아이콘 등)에만 각자 flex-shrink: 0 을 줍니다.
  */
-:root {
-}
 html,
 body {
   height: 100%;
@@ -320,8 +300,6 @@ button {
   border: 0;
   background-color: transparent;
   background: none;
-}
-a {
 }
 table {
   width: 100%;

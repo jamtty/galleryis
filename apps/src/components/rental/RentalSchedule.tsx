@@ -10,7 +10,7 @@ import {
   type RentalWeek,
 } from '@/api/rentals'
 import { PATHS } from '@/routes/paths'
-import { formatDotDate, formatDotRange } from '@/utils/date'
+import { formatDotDate, formatDotRange, todayIso } from '@/utils/date'
 
 /**
  * 대관신청 구분 순서 — 이미지와 동일하게
@@ -41,15 +41,19 @@ function weekLabel(week: RentalWeek) {
 }
 
 type RentalScheduleProps = {
-  /** 대관신청을 새 창으로 엽니다 (관리자 화면용) */
-  newWindow?: boolean
+  /**
+   * 예약된 칸(심사중 · 대관완료)을 그 신청서 수정 화면으로 연결합니다. (관리자 화면용)
+   *
+   * 신청서 수정은 관리자만 볼 수 있어 공개 화면에서는 켜지 않습니다.
+   */
+  linkRequests?: boolean
   /** 처음 보여 줄 검색 기간 (기본 6개월) */
   defaultUnit?: RentalUnit
 }
 
 /** 전시 기간 확인 및 신청 — 기간 검색 + 대관신청 구분 + 전시장별 주간 표 */
 export default function RentalSchedule({
-  newWindow = false,
+  linkRequests = false,
   defaultUnit = '6m',
 }: RentalScheduleProps) {
   const navigate = useNavigate()
@@ -100,21 +104,30 @@ export default function RentalSchedule({
   const loading = state.unit !== unit
   const weeks = loading ? [] : state.weeks
 
+  /**
+   * 검색기간 시작일 — 오늘입니다.
+   *
+   * 표의 첫 주는 아직 시작하지 않은 주라 오늘보다 뒤일 수 있어서,
+   * 둘 중 이른 날짜를 시작일로 보여 줍니다. (레거시 대관 화면과 같은 모양)
+   */
+  const rangeStart =
+    weeks.length === 0
+      ? ''
+      : [todayIso(), weeks[0].start].sort()[0]
+
   const toggle = (status: RentalStatus) => {
     setVisible((current) => ({ ...current, [status]: !current[status] }))
   }
 
   const apply = (hallId: string, week: RentalWeek) => {
     const query = new URLSearchParams({ hall: hallId, week: week.start })
-    const to = `${PATHS.rentalApply}?${query.toString()}`
 
-    // 관리자 화면에서는 일정 표를 띄워 둔 채 신청서를 새 창으로 엽니다.
-    if (newWindow) {
-      window.open(to, '_blank', 'noopener,noreferrer')
-      return
-    }
+    navigate(`${PATHS.rentalApply}?${query.toString()}`)
+  }
 
-    navigate(to)
+  /** 예약된 칸 — 관리자 화면에서는 그 신청서 수정 화면으로 갑니다. */
+  const openRequest = (id: number) => {
+    navigate(PATHS.adminRentalEdit.replace(':id', String(id)))
   }
 
   return (
@@ -150,7 +163,7 @@ export default function RentalSchedule({
           {weeks.length > 0 && (
             <p className="rental-filter__range">
               <span className="rental-filter__date">
-                {formatDotDate(weeks[0].start)}
+                {formatDotDate(rangeStart)}
               </span>
               <span className="rental-filter__tilde" aria-hidden="true">
                 ~
@@ -218,11 +231,13 @@ export default function RentalSchedule({
                     {weekLabel(week)}
                   </th>
                   {RENTAL_HALLS.map((hall) => {
-                    const status: RentalStatus =
-                      week.halls[hall.id] ?? 'available'
+                    const booking = week.halls[hall.id] ?? {
+                      status: 'available' as RentalStatus,
+                      id: 0,
+                    }
 
                     // 구분 필터에서 끈 상태는 빈 칸으로 둡니다.
-                    if (!visible[status]) {
+                    if (!visible[booking.status]) {
                       return (
                         <td key={hall.id}>
                           <span className="rental-cell is-off" />
@@ -230,7 +245,7 @@ export default function RentalSchedule({
                       )
                     }
 
-                    if (status === 'available') {
+                    if (booking.status === 'available') {
                       return (
                         <td key={hall.id}>
                           <button
@@ -244,9 +259,33 @@ export default function RentalSchedule({
                       )
                     }
 
+                    const label = RENTAL_STATUS_LABELS[booking.status]
+
+                    // 예약된 칸 — 관리자에게는 신청서로 가는 버튼으로 보여 줍니다.
+                    if (linkRequests && booking.id > 0) {
+                      return (
+                        <td key={hall.id}>
+                          <button
+                            type="button"
+                            className={`rental-cell rental-cell--${booking.status} rental-cell--link`}
+                            title={`${label} 신청서 열기`}
+                            aria-label={`${label} 신청서 열기`}
+                            onClick={() => openRequest(booking.id)}
+                          >
+                            {label}
+                            <span className="rental-cell__mark" aria-hidden="true">
+                              ↗
+                            </span>
+                          </button>
+                        </td>
+                      )
+                    }
+
                     return (
                       <td key={hall.id}>
-                        <span className={`rental-cell rental-cell--${status}`} />
+                        <span
+                          className={`rental-cell rental-cell--${booking.status}`}
+                        />
                       </td>
                     )
                   })}

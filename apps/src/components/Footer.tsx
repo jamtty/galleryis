@@ -63,14 +63,6 @@ export default function Footer() {
           </div>
         </dl>
 
-        <Link
-          to={`${PATHS.about}#visit`}
-          className="btn btn--pill btn--on-dark site-footer__cta"
-        >
-          오시는 길
-          <span aria-hidden="true">→</span>
-        </Link>
-
         <div className="site-footer__bottom">
           <Link to={PATHS.privacy} className="site-footer__privacy">
             개인정보처리방침

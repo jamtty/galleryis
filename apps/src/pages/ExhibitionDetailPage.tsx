@@ -62,9 +62,20 @@ export default function ExhibitionDetailPage() {
     }
   }, [exId, valid])
 
+  /**
+   * 목록으로 — 보고 있는 전시와 **같은 분류 탭**으로 돌아갑니다.
+   *
+   * 목록 페이지는 `status` 가 없으면 현재전시 탭이라, 예정·지난 전시는 주소에 분류를 붙입니다.
+   * (불러오기 전·오류 화면에서는 그냥 목록으로)
+   */
+  const listHref =
+    exhibition !== null && exhibition.status !== '' && exhibition.status !== 'current'
+      ? `${PATHS.exhibitions}?status=${exhibition.status}`
+      : PATHS.exhibitions
+
   /** 위 — 목록으로 가는 심플한 링크 (화살표 + 글씨 · 오른쪽 정렬) */
   const backLink = (
-    <Link to={PATHS.exhibitions} className="ex-detail__back">
+    <Link to={listHref} className="ex-detail__back">
       <ArrowLeftIcon className="icon-20" />
       목록으로
     </Link>
@@ -72,7 +83,7 @@ export default function ExhibitionDetailPage() {
 
   /** 아래 — 공지 상세와 같은 큰 버튼 (가운데 정렬) */
   const listButton = (
-    <Link to={PATHS.exhibitions} className="btn btn--pill btn--outline btn--lg">
+    <Link to={listHref} className="btn btn--pill btn--outline btn--lg">
       전시 목록으로
     </Link>
   )
@@ -142,6 +153,17 @@ export default function ExhibitionDetailPage() {
               <h1 className="ex-detail__title">{exhibition.title}</h1>
 
               <dl className="ex-detail__info">
+                {exhibition.statusLabel !== '' && (
+                  <div className="ex-detail__info_row">
+                    <dt>전시상태</dt>
+                    <dd>
+                      <span className={`status-badge status-badge--${exhibition.status}`}>
+                        {exhibition.statusLabel}
+                      </span>
+                    </dd>
+                  </div>
+                )}
+
                 {exhibition.artist !== '' && (
                   <div className="ex-detail__info_row">
                     <dt>작가명</dt>
@@ -166,7 +188,7 @@ export default function ExhibitionDetailPage() {
             </header>
           </div>
 
-          {/* 전시 작품 — 모바일 2열 · 데스크톱 4열 */}
+          {/* 전시 작품 — 모바일 2열 · 데스크톱 4열, 어느 것을 눌러도 첫 사진부터 크게 보기 */}
           {works.length > 0 && (
             <section className="ex-detail__section">
               <h2 className="ex-detail__section_title">전시 작품</h2>
@@ -177,8 +199,8 @@ export default function ExhibitionDetailPage() {
                     <button
                       type="button"
                       className="ex-detail__work"
-                      aria-label={`${exhibition.title} 사진 ${index + 2} 크게 보기`}
-                      onClick={() => setZoomed(index + 1)}
+                      aria-label={`${exhibition.title} 사진 크게 보기`}
+                      onClick={() => setZoomed(0)}
                     >
                       <img
                         src={file.url}

@@ -88,26 +88,6 @@
 .btn_pw_toggle:hover {
   color: #4b5563;
 }
-.admin_login_options {
-  display: flex;
-  gap: 1.6rem;
-  margin-bottom: 2rem;
-}
-.admin_login_options label {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  font-size: 1.3rem;
-  color: #555;
-  cursor: pointer;
-  user-select: none;
-}
-.admin_login_options input[type='checkbox'] {
-  width: 1.5rem;
-  height: 1.5rem;
-  accent-color: #2563eb;
-  cursor: pointer;
-}
 .admin_login_error {
   font-size: 1.3rem;
   color: #ef4444;
@@ -136,29 +116,6 @@
 .btn_admin_login:disabled {
   opacity: 0.6;
   cursor: not-allowed;
-}
-.admin_login_links {
-  display: flex;
-  justify-content: center;
-  gap: 0;
-  margin-top: 1.8rem;
-}
-.admin_login_links a,
-.admin_login_links span {
-  font-size: 1.3rem;
-  color: #6b7280;
-  text-decoration: none;
-  padding: 0 1.2rem;
-  cursor: pointer;
-}
-.admin_login_links a:hover {
-  color: #2563eb;
-  text-decoration: underline;
-}
-.admin_login_links .divider {
-  color: #d1d5db;
-  padding: 0;
-  cursor: default;
 }
 
 /* ===== 관리자 메인 ===== */
@@ -261,6 +218,8 @@
   display: flex;
   flex-direction: column;
   min-height: 100vh;
+  /* 넓은 표가 있어도 여기서 줄어들어야 표 안에서 가로 스크롤됩니다 */
+  min-width: 0;
 }
 
 /* 상단 헤더 */
@@ -339,6 +298,8 @@
 .adm_main {
   padding: 2.4rem;
   flex: 1;
+  /* 표·긴 내용이 있어도 화면 밖으로 밀리지 않게 */
+  min-width: 0;
 }
 .adm_section {
   background: #fff;
@@ -391,70 +352,7 @@
   background: #2563eb;
 }
 
-/* 콘텐츠 현황 */
-.adm_stats {
-  display: flex;
-  gap: 0;
-}
-.adm_stat_card {
-  flex: 1;
-  padding: 2.4rem 2rem;
-  text-align: center;
-  border-right: 1px solid #e5e7eb;
-}
-.adm_stat_card:last-child {
-  border-right: none;
-}
-.adm_stat_label {
-  font-size: 1.3rem;
-  color: #888;
-  margin-bottom: 0.8rem;
-}
-.adm_stat_count {
-  font-size: 3.2rem;
-  font-weight: 700;
-  color: #2563eb;
-  line-height: 1;
-}
-.adm_stat_unit {
-  font-size: 1.2rem;
-  color: #aaa;
-  margin-top: 0.4rem;
-}
-
-/* 바로가기 */
-.adm_shortcuts {
-  display: flex;
-  gap: 1.6rem;
-  padding: 2rem;
-}
-.adm_shortcut_card {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 1rem;
-  padding: 2.4rem 1.6rem;
-  border: 1px solid #e5e7eb;
-  border-radius: 0.8rem;
-  text-decoration: none;
-  color: #333;
-  transition:
-    background 0.15s,
-    border-color 0.15s;
-}
-.adm_shortcut_card:hover {
-  background: #eff6ff;
-  border-color: #93c5fd;
-}
-.adm_shortcut_icon {
-  font-size: 2.8rem;
-}
-.adm_shortcut_label {
-  font-size: 1.4rem;
-  font-weight: 500;
-  color: #333;
-}
+/* ── 사용여부 토글 (ToggleSwitch) ──────────────────────── */
 
 /* ===== 관리자 마이페이지 ===== */
 .adm_mypage_info {
@@ -707,39 +605,6 @@
 }
 .adm_search_select:focus {
   border-color: #2563eb;
-}
-.adm_search_keyword {
-  height: 3.8rem;
-  padding: 0 1.2rem;
-  border: 1px solid #d1d5db;
-  border-radius: 0.6rem;
-  font-size: 1.4rem;
-  width: 22rem;
-  outline: none;
-  box-sizing: border-box;
-}
-.adm_search_keyword:focus {
-  border-color: #2563eb;
-}
-.adm_search_btn {
-  height: 3.8rem;
-  width: 3.8rem;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  background: #2563eb;
-  color: #fff;
-  border: none;
-  border-radius: 0.6rem;
-  cursor: pointer;
-  transition: background 0.15s;
-  flex-shrink: 0;
-}
-.adm_search_btn:hover {
-  background: #1d4ed8;
-}
-.adm_search_btn .material-icons {
-  font-size: 2rem;
 }
 .adm_search_form input {
   height: 3.8rem;
@@ -1034,18 +899,6 @@ select.adm_btn_secondary {
   outline: 0.2rem solid #93c5fd;
   outline-offset: 0.2rem;
 }
-.adm_pin_badge {
-  display: inline-block;
-  margin-right: 6px;
-  padding: 1px 6px;
-  border-radius: 4px;
-  background: #e53e3e;
-  color: #fff;
-  font-size: 11px;
-  font-weight: 700;
-  vertical-align: middle;
-  line-height: 1.6;
-}
 .adm_action_btns {
   display: flex;
   align-items: center;
@@ -1128,13 +981,6 @@ select.adm_btn_secondary {
   color: #6b7280;
 }
 
-/* ── 메인 빈 상태 ──────────────────────────────────────── */
-.home_empty {
-  color: #9ca3af;
-  font-size: 1.4rem;
-  text-align: center;
-  padding: 4rem 0;
-}
 .adm_page_btns {
   display: flex;
   gap: 0.4rem;
@@ -1159,68 +1005,7 @@ select.adm_btn_secondary {
   border-color: #2563eb;
 }
 
-/* ── 관리자 게시글 작성/수정 폼 ─────────────────────── */
-.adm_post_form {
-  padding: 2rem;
-  display: flex;
-  flex-direction: column;
-  gap: 1.6rem;
-}
-.adm_post_form .adm_form_field label {
-  display: block;
-  font-size: 1.4rem;
-  font-weight: 600;
-  color: #374151;
-  margin-bottom: 0.6rem;
-}
-.adm_post_form .adm_form_field input {
-  height: 4.4rem;
-  padding: 0 1.2rem;
-  border: 1px solid #d1d5db;
-  border-radius: 0.6rem;
-  font-size: 1.4rem;
-  width: 100%;
-  outline: none;
-  box-sizing: border-box;
-  transition: border-color 0.15s;
-}
-.adm_post_form .adm_form_field input:focus {
-  border-color: #2563eb;
-}
-.adm_post_form .adm_form_field textarea {
-  padding: 1.2rem;
-  border: 1px solid #d1d5db;
-  border-radius: 0.6rem;
-  font-size: 1.4rem;
-  width: 100%;
-  resize: vertical;
-  outline: none;
-  box-sizing: border-box;
-  font-family: inherit;
-  line-height: 1.6;
-  transition: border-color 0.15s;
-}
-.adm_post_form .adm_form_field textarea:focus {
-  border-color: #2563eb;
-}
-.adm_required {
-  color: #dc2626;
-}
-.adm_form_actions {
-  display: flex;
-  justify-content: flex-end;
-  gap: 0.8rem;
-  padding-top: 1rem;
-  border-top: 1px solid #e5e7eb;
-}
-.adm_form_actions .adm_btn_secondary,
-.adm_form_actions .adm_btn_primary {
-  height: 4.4rem;
-  padding: 0 2.4rem;
-  font-size: 1.4rem;
-}
-
-/* ── adm_form 계열 (보도자료·채용·건강정보 폼) ── */
+/* ── adm_form 계열 (수정 폼 공통) ── */
 .adm_form {
   padding: 2rem;
   display: flex;
@@ -1268,6 +1053,91 @@ select.adm_btn_secondary {
   display: flex;
   align-items: center;
   gap: 0.8rem;
+}
+/* 세로형 행(.adm_form_row_col) 안의 입력칸은 남는 높이를 채우지 않게 (flex:1 무효화) */
+.adm_form_row_col .adm_form_input {
+  flex: none;
+  width: 100%;
+}
+/* 가로로 나란히 두는 칸(.adm_form_inline)은 다시 나눠 갖게 되돌립니다.
+   (width:100% 가 남아 있으면 둘째 칸이 오른쪽으로 밀려 나갑니다) */
+.adm_form_row_col .adm_form_inline .adm_form_input {
+  flex: 1 1 auto;
+  width: auto;
+  min-width: 0;
+}
+.adm_inline_field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  flex: 1 1 auto;
+  min-width: 0;
+}
+/* 금액은 짧으니 좁게 */
+.adm_inline_field_price {
+  flex: 0 1 18rem;
+}
+.adm_inline_label {
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: #6b7280;
+}
+
+/* ── 도면·조감도 (전시장 수정 — 이미지 1장) ─────────────── */
+.adm_sheet {
+  display: flex;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  gap: 2rem;
+}
+.adm_sheet_preview {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 30rem;
+  min-height: 18rem;
+  padding: 1rem;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.8rem;
+  background: #fff;
+}
+.adm_sheet_preview img {
+  max-width: 100%;
+  max-height: 22rem;
+  object-fit: contain;
+}
+.adm_sheet_empty {
+  font-size: 1.3rem;
+  color: #9ca3af;
+}
+.adm_sheet_side {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.8rem;
+  min-width: 0;
+}
+/* 실제 file 입력칸은 숨기고 라벨(.adm_sheet_pick)을 눌러 고릅니다 */
+.adm_sheet_input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+}
+.adm_sheet_pick {
+  display: inline-flex;
+  align-items: center;
+  cursor: pointer;
+}
+.adm_sheet_reset {
+  padding: 0;
+  border: 0;
+  background: none;
+  font-size: 1.3rem;
+  color: #2563eb;
+  text-decoration: underline;
+  cursor: pointer;
 }
 .adm_form_textarea {
   width: 100%;
@@ -1346,23 +1216,6 @@ select.adm_btn_secondary {
   align-items: center;
   gap: 1rem;
 }
-.adm_file_label {
-  display: inline-flex;
-  align-items: center;
-  height: 3.6rem;
-  padding: 0 1.4rem;
-  background: #f3f4f6;
-  border: 1px solid #d1d5db;
-  border-radius: 0.4rem;
-  font-size: 1.3rem;
-  cursor: pointer;
-  white-space: nowrap;
-  transition: background 0.15s;
-  flex-shrink: 0;
-}
-.adm_file_label:hover {
-  background: #e5e7eb;
-}
 .adm_file_name {
   font-size: 1.3rem;
   color: #6b7280;
@@ -1383,25 +1236,6 @@ select.adm_btn_secondary {
   outline: 0.2rem dashed #2563eb;
   outline-offset: 0.4rem;
   border-radius: 0.6rem;
-}
-/* 라디오 그룹 */
-.adm_radio_group {
-  display: flex;
-  gap: 2rem;
-}
-.adm_radio {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  font-size: 1.4rem;
-  cursor: pointer;
-  color: #374151;
-}
-.adm_radio input[type='radio'] {
-  accent-color: #2563eb;
-  width: 1.6rem;
-  height: 1.6rem;
-  cursor: pointer;
 }
 /* ── 분류 선택 (박스형 라디오) ── */
 .adm_radio_field {
@@ -1468,6 +1302,29 @@ select.adm_btn_secondary {
   font-size: 1.2rem;
   color: #9ca3af;
 }
+/* 대관 상태 — 아래 신청서 양식과 좌우를 맞추고, 제목·양식과 사이를 띄웁니다.
+   (.adm_form_row 의 padding: 0.4rem 0 을 덮어씁니다) */
+.adm_status_field {
+  margin-block: 1.6rem 0.8rem;
+  padding: 1.2rem 2.4rem;
+  border-bottom: 1px solid #f3f4f6;
+}
+/* 분류 — 기간으로 자동 결정되는 값 (읽기 전용 표시) */
+.adm_auto_status {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.8rem;
+  margin: 0;
+}
+.adm_auto_status_note {
+  font-size: 1.3rem;
+  color: #6b7280;
+}
+.adm_auto_status_empty {
+  font-size: 1.4rem;
+  color: #9ca3af;
+}
 .adm_form_btns {
   display: flex;
   justify-content: flex-end;
@@ -1483,116 +1340,6 @@ select.adm_btn_secondary {
 }
 .required {
   color: #dc2626;
-}
-
-/* ── 메디TV 폼 ── */
-.medi_tv_form_column {
-  display: flex;
-  flex-direction: column;
-  gap: 1.2rem;
-  flex: 1;
-}
-.medi_tv_form_column .adm_form_input {
-  flex: unset;
-  width: 100%;
-}
-.medi_tv_preview {
-  width: 100%;
-  max-width: 320px;
-  height: auto;
-  border-radius: 0.6rem;
-  border: 1px solid #e5e7eb;
-  display: block;
-}
-
-/* ── 상태 배지 ── */
-.adm_status_badge {
-  display: inline-block;
-  padding: 0.2rem 0.8rem;
-  border-radius: 2rem;
-  font-size: 1.1rem;
-  font-weight: 600;
-}
-.adm_status_done {
-  background: #dcfce7;
-  color: #16a34a;
-}
-.adm_status_wait {
-  background: #fef9c3;
-  color: #b45309;
-}
-
-/* ── 상세 보기 테이블 ── */
-.adm_view_table_wrap {
-  border: 1px solid #e5e7eb;
-  border-radius: 0.6rem;
-  overflow: hidden;
-}
-.adm_view_table {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: 1.4rem;
-}
-.adm_view_table th,
-.adm_view_table td {
-  padding: 1.2rem 1.6rem;
-  border-bottom: 1px solid #e5e7eb;
-  text-align: left;
-  vertical-align: middle;
-  line-height: 1.6;
-}
-.adm_view_table tr:last-child th,
-.adm_view_table tr:last-child td {
-  border-bottom: none;
-}
-.adm_view_table th {
-  width: 12rem;
-  background: #f9fafb;
-  font-weight: 600;
-  color: #374151;
-  white-space: nowrap;
-}
-.adm_view_content {
-  line-height: 1.8;
-  word-break: break-word;
-  white-space: pre-wrap;
-}
-.adm_view_content img {
-  max-width: 100%;
-}
-.adm_empty_text {
-  color: #9ca3af;
-}
-
-/* ── 답변 섹션 ── */
-.adm_reply_section {
-  margin-top: 2.4rem;
-}
-.adm_reply_header {
-  display: flex;
-  align-items: center;
-  font-size: 1.6rem;
-  font-weight: 700;
-  color: #1e3a5f;
-  border-bottom: 2px solid #1e3a5f;
-  margin-bottom: 0;
-  padding:1rem;
-}
-.adm_reply_textarea {
-  width: 100%;
-  padding: 1.2rem;
-  border: 1px solid #d1d5db;
-  border-radius: 0.6rem;
-  font-size: 1.4rem;
-  font-family: inherit;
-  resize: vertical;
-  outline: none;
-  box-sizing: border-box;
-  line-height: 1.6;
-  transition: border-color 0.15s;
-}
-.adm_reply_textarea:focus {
-  border-color: #2563eb;
 }
 
 /* ── 사용여부 토글 (ToggleSwitch) ──────────────────────── */
@@ -1942,4 +1689,87 @@ select.adm_btn_secondary {
 .adm_badge_past,
 .adm_cal_cell {
   flex-shrink: 0;
+}
+
+/* ==========================================================================
+   좁은 화면 — 사이드바가 서랍이 되고, 본문이 화면 폭을 다 씁니다.
+   (≤767px: 헤더 높이 6rem · 본문 여백 1.6rem)
+   ========================================================================== */
+
+/* 메뉴 버튼 — 넓은 화면에서는 숨김 */
+.adm_menu_btn {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 4rem;
+  height: 4rem;
+  margin-right: 1.2rem;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.6rem;
+  background: #fff;
+  color: #333;
+  cursor: pointer;
+}
+
+.adm_menu_btn:hover {
+  background: #f3f4f6;
+}
+
+/* 서랍 뒤 어둠막 — 넓은 화면에서는 쓰지 않음 */
+.adm_scrim {
+  display: none;
+}
+
+@media (max-width: 767px) {
+  .adm_sidebar {
+    transform: translateX(-100%);
+    transition: transform 0.2s ease;
+    width: 26rem;
+    min-width: 26rem;
+    box-shadow: 0 0 24px rgb(0 0 0 / 0.18);
+  }
+
+  .adm_sidebar.is-open {
+    transform: translateX(0);
+  }
+
+  .adm_content {
+    margin-left: 0;
+  }
+
+  .adm_header {
+    height: auto;
+    min-height: 6rem;
+    padding: 0 1.6rem;
+    gap: 1.2rem;
+  }
+
+  .adm_menu_btn {
+    display: inline-flex;
+  }
+
+  /* 제목이 길어도 사용자 버튼을 밀어내지 않게 */
+  .adm_page_title {
+    flex: 1 1 auto;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .adm_main {
+    padding: 1.6rem;
+  }
+
+  .adm_scrim {
+    display: block;
+    position: fixed;
+    inset: 0;
+    z-index: 99;
+    border: 0;
+    padding: 0;
+    background: rgb(0 0 0 / 0.35);
+    cursor: pointer;
+  }
 }

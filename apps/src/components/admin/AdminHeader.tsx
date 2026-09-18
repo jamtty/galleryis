@@ -6,10 +6,18 @@ import { useAuthStore } from '@/store/useAuthStore'
 
 type AdminHeaderProps = {
   pageTitle: string
+  /** 좁은 화면에서 사이드바 서랍이 열려 있는지 */
+  menuOpen?: boolean
+  /** 좁은 화면에서 메뉴 버튼을 눌렀을 때 */
+  onMenuToggle?: () => void
 }
 
-/** 관리자 상단 헤더 (페이지 제목 + 사용자 메뉴) */
-export default function AdminHeader({ pageTitle }: AdminHeaderProps) {
+/** 관리자 상단 헤더 (메뉴 버튼 + 페이지 제목 + 사용자 메뉴) */
+export default function AdminHeader({
+  pageTitle,
+  menuOpen = false,
+  onMenuToggle,
+}: AdminHeaderProps) {
   const navigate = useNavigate()
   const { user, clearAuth } = useAuthStore()
   const [open, setOpen] = useState(false)
@@ -46,6 +54,19 @@ export default function AdminHeader({ pageTitle }: AdminHeaderProps) {
 
   return (
     <header className="adm_header">
+      {/* 좁은 화면에서만 보이는 메뉴 버튼 (사이드바 서랍) */}
+      <button
+        type="button"
+        className="adm_menu_btn"
+        aria-label="메뉴"
+        aria-expanded={menuOpen}
+        onClick={onMenuToggle}
+      >
+        <span className="material-icons" aria-hidden="true">
+          {menuOpen ? 'close' : 'menu'}
+        </span>
+      </button>
+
       <h1 className="adm_page_title">{pageTitle}</h1>
 
       <div className="adm_user" ref={userRef}>

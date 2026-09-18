@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
+import { toIsoDate } from '@/utils/date'
 
 /**
  * 관리자 전용 달력 입력.
@@ -27,14 +28,8 @@ type DatePickerProps = {
 
 const WEEKDAYS = ['일', '월', '화', '수', '목', '금', '토'] as const
 
-function pad(value: number) {
-  return String(value).padStart(2, '0')
-}
-
-function toYmd(date: Date) {
-  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`
-}
-
+/** 로컬 날짜 → YYYY-MM-DD (utils/date.ts 와 같은 규칙) */
+const toYmd = toIsoDate
 /** YYYY-MM-DD → Date (형식이 아니면 null) */
 function parseYmd(value: string) {
   const parts = (value ?? '').split('-')

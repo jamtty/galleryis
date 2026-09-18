@@ -22,11 +22,6 @@ export function logoutAdmin() {
   return apiRequest<null>('/api/auth/logout.php', { method: 'POST' })
 }
 
-/** 현재 토큰의 관리자 정보 조회 */
-export function fetchMe() {
-  return apiRequest<AdminUser>('/api/auth/me.php')
-}
-
 /** 새 비밀번호 최소 길이 — backend/api/auth/password.php 와 동일하게 유지하세요. */
 export const PASSWORD_MIN_LENGTH = 4
 
