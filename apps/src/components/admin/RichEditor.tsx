@@ -10,16 +10,23 @@ import { renderBodyHtml } from '@/utils/html'
  * 외부 라이브러리 없이 contentEditable + document.execCommand 로 동작합니다.
  * (에디터 스타일은 assets/css/editor.css — useEditorStyles() 가 불러옵니다)
  */
+/** 업로드된 이미지 — 본문에는 url 만 쓰지만 서버가 크기까지 함께 줍니다. */
+export type EditorImage = {
+  url: string
+  width?: number
+  height?: number
+}
+
 type RichEditorProps = {
   /** HTML 문자열 */
   value: string
   onChange: (html: string) => void
   placeholder?: string
   /**
-   * 이미지를 서버에 올리고 URL 을 돌려주는 함수.
+   * 이미지를 서버에 올리는 함수. (업로드 API 를 그대로 넘기면 됩니다)
    * 없으면 이미지를 data URI 로 본문에 넣습니다. (DB 용량 주의)
    */
-  onUploadImage?: (file: File) => Promise<string>
+  onUploadImage?: (file: File) => Promise<EditorImage>
   disabled?: boolean
 }
 
@@ -257,7 +264,7 @@ export default function RichEditor({
 
       try {
         const url = onUploadImage
-          ? await onUploadImage(file)
+          ? (await onUploadImage(file)).url
           : await readAsDataUrl(file)
 
         exec('insertHTML', `<p><img src="${escapeAttr(url)}" alt=""></p>`)
