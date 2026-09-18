@@ -359,6 +359,7 @@
   /* .hero 가 화면 높이를 채우므로 여기는 최소 높이만 잡아 둡니다. */
   min-height: 57.6rem;
   padding: 5.6rem;
+  background: #f8f8f8;
 }
 
 .hero__image {
