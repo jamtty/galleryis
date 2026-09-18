@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import type { CSSProperties } from 'react'
 import { fetchActivePopups, type ActivePopup } from '@/api/popups'
+import { useMediaQuery } from '@/hooks/useMediaQuery'
 
 /**
  * 공개 사이트 팝업 레이어 — 메인(/)에서만 씁니다.
@@ -78,6 +79,9 @@ export default function PopupLayer() {
   const [index, setIndex] = useState(0)
   const [hideToday, setHideToday] = useState(false)
 
+  /** 좁은 화면(휴대폰) — 가로를 꽉 채웁니다. (아래 `current` 가 없을 때도 훅은 항상 불려야 합니다) */
+  const narrow = useMediaQuery('(max-width: 767px)')
+
   useEffect(() => {
     let cancelled = false
 
@@ -138,11 +142,20 @@ export default function PopupLayer() {
   const centeredX = current.posLeft === 0
   const centeredY = current.posTop === 0
 
-  const boxStyle: CSSProperties = {
-    left: centeredX ? '50%' : `${current.posLeft}px`,
-    top: centeredY ? '50%' : `${current.posTop}px`,
-    transform: `translate(${centeredX ? '-50%' : '0'}, ${centeredY ? '-50%' : '0'})`,
-  }
+  // 좁은 화면에서는 좌우 위치를 무시하고 가로를 꽉 채웁니다. 세로 위치만 그대로 씁니다.
+  const boxStyle: CSSProperties = narrow
+    ? {
+        left: 0,
+        top: centeredY ? '50%' : `${current.posTop}px`,
+        transform: centeredY ? 'translateY(-50%)' : 'none',
+        width: '100%',
+        maxWidth: '100%',
+      }
+    : {
+        left: centeredX ? '50%' : `${current.posLeft}px`,
+        top: centeredY ? '50%' : `${current.posTop}px`,
+        transform: `translate(${centeredX ? '-50%' : '0'}, ${centeredY ? '-50%' : '0'})`,
+      }
 
   return (
     <div className="popup_layer">

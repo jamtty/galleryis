@@ -3346,9 +3346,10 @@ a.notice-detail__file_name:focus-visible {
     right: revert;
   }
 
+  /* 휴대폰: 가로를 꽉 채웁니다. (가로 위치는 인라인 스타일을 덮어씁니다) */
   .popup_box {
-    max-width: 88vw;
-    max-height: 80vh;
+    max-width: 100%;
+    max-height: 80dvh;
   }
 
   .popup_text {
