@@ -61,6 +61,18 @@ function rememberClosedId(id: number) {
   }
 }
 
+/** 닫은 기록을 모두 지웁니다. (주소에 ?popup=1 을 붙여 다시 볼 때) */
+function clearClosedIds() {
+  try {
+    localStorage.removeItem(STORAGE_KEY)
+  } catch {
+    // 지우지 못하면 그대로 둡니다.
+  }
+}
+
+/** 주소에 ?popup=1 이 있으면 닫은 기록을 무시하고 다시 보여 줍니다. (확인용) */
+const FORCE_SHOW = new URLSearchParams(window.location.search).has('popup')
+
 export default function PopupLayer() {
   const [popups, setPopups] = useState<ActivePopup[]>([])
   const [index, setIndex] = useState(0)
@@ -69,11 +81,17 @@ export default function PopupLayer() {
   useEffect(() => {
     let cancelled = false
 
-    fetchActivePopups()
+    // 이 호스팅은 요청이 가끔 멈춥니다 → 첫 시도가 실패(시간 초과)하면 한 번 더 받아 봅니다.
+    const load = () => fetchActivePopups().catch(() => fetchActivePopups())
+
+    load()
       .then((items) => {
         if (cancelled) return
 
-        const closed = readClosedIds()
+        // ?popup=1 로 들어왔으면 닫은 기록을 지우고 그대로 보여 줍니다.
+        if (FORCE_SHOW) clearClosedIds()
+
+        const closed = FORCE_SHOW ? [] : readClosedIds()
 
         setPopups(items.filter((item) => !closed.includes(item.id)))
       })

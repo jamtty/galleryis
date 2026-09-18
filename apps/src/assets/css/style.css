@@ -2940,12 +2940,6 @@ a.notice-detail__file_name:focus-visible {
   text-underline-offset: 4px;
 }
 
-.hall-footnote {
-  margin-top: 4.8rem;
-  font-size: var(--text-sm);
-  color: var(--color-ink-soft);
-}
-
 /* ==========================================================================
    15. 전시장 3D 둘러보기 (/halls/:key/studio)
    규모로 만든 방 안에서 사진을 벽에 붙여 둘러보는 화면

@@ -190,6 +190,7 @@ async function attachBrowser(onEvent) {
 /** 브라우저에서 올라온 오류 (스크롤 중 터지는 예외 확인) */
 const exceptions = []
 const consoleErrors = []
+const consoleWarns = []
 const browser = await attachBrowser((message) => {
   if (message.method === 'Runtime.exceptionThrown') {
     const details = message.params.exceptionDetails
@@ -200,6 +201,11 @@ const browser = await attachBrowser((message) => {
   // React 개발 모드 경고 등도 여기로 올라옵니다 — 참고용으로만 모읍니다.
   if (message.method === 'Runtime.consoleAPICalled' && message.params.type === 'error') {
     consoleErrors.push(message.params.args.map((item) => item.description ?? item.value).join(' '))
+  }
+
+  // console.warn — 팝업을 못 받아 왔을 때처럼 **조용히 넘어가는 실패**를 드러냅니다.
+  if (message.method === 'Runtime.consoleAPICalled' && message.params.type === 'warning') {
+    consoleWarns.push(message.params.args.map((item) => item.description ?? item.value).join(' '))
   }
 })
 
@@ -332,6 +338,17 @@ if (EVAL) {
   await sleep(2500)
 
   console.log(JSON.stringify(await evaluate(EVAL), null, 2))
+
+  if (consoleWarns.length > 0) {
+    console.log(`(참고) console.warn ${consoleWarns.length}건`)
+    for (const warn of consoleWarns) console.log(`  · ${warn}`)
+  }
+
+  if (exceptions.length > 0) {
+    console.log(`브라우저 예외 ${exceptions.length}건`)
+    for (const error of exceptions) console.log(`  · ${error}`)
+  }
+
   shutdown()
   process.exit(0)
 }
@@ -582,6 +599,11 @@ if (exceptions.length > 0) {
 if (consoleErrors.length > 0) {
   console.log(`(참고) console.error ${consoleErrors.length}건`)
   for (const error of consoleErrors.slice(0, DEBUG ? consoleErrors.length : 2)) console.log(`  · ${error}`)
+}
+
+if (consoleWarns.length > 0) {
+  console.log(`(참고) console.warn ${consoleWarns.length}건`)
+  for (const warn of consoleWarns.slice(0, DEBUG ? consoleWarns.length : 3)) console.log(`  · ${warn}`)
 }
 
 if (failures.length === 0) {

@@ -190,10 +190,6 @@ export default function HallsPage() {
                 )
               })}
             </div>
-
-            <p className="hall-footnote">
-              치수는 공개 도면을 바탕으로 한 근사치입니다.
-            </p>
           </>
         )}
       </div>

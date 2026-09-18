@@ -30,6 +30,15 @@ export type RequestOptions = {
   auth?: boolean
 }
 
+/**
+ * 응답을 기다리는 최대 시간.
+ *
+ * Cafe24 호스팅은 요청을 연달아 보낼 때 가끔 응답이 멈춥니다.
+ * 시간 초과가 없으면 그 요청은 **영영 끝나지 않아** 화면이 조용히 비어 버립니다.
+ * (예: 메인에 팝업이 안 뜨고 콘솔에도 아무 것도 안 남음)
+ */
+const TIMEOUT_MS = 12_000
+
 /** 백엔드 공통 응답 형식 */
 type ApiEnvelope<T> = {
   success: boolean
@@ -73,8 +82,17 @@ export async function apiRequest<T>(
       method,
       headers,
       body: form ?? (body === undefined ? undefined : JSON.stringify(body)),
+      // 파일 업로드는 오래 걸릴 수 있어 시간 초과를 두지 않습니다.
+      signal: form ? undefined : AbortSignal.timeout(TIMEOUT_MS),
     })
-  } catch {
+  } catch (err) {
+    if (err instanceof DOMException && err.name === 'TimeoutError') {
+      throw new ApiError(
+        '응답이 없습니다. 잠시 후 다시 시도해 주세요.',
+        0,
+      )
+    }
+
     throw new ApiError(
       '서버에 연결할 수 없습니다. 네트워크 상태를 확인해 주세요.',
       0,
