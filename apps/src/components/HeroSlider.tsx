@@ -4,6 +4,7 @@ import type { PublicExhibitionItem } from '@/api/exhibitions'
 import { formatDotRange } from '@/utils/date'
 import { EXHIBITION_PLACEHOLDER } from '../data/exhibitions'
 import { PATHS } from '../routes/paths'
+import { ChevronLeftIcon, ChevronRightIcon } from './icons'
 
 /** 자동 넘김 간격 (원본과 동일하게 4.5초) */
 const AUTO_PLAY_MS = 4500
@@ -54,7 +55,15 @@ export default function HeroSlider({ items }: HeroSliderProps) {
       onBlurCapture={() => setPaused(false)}
     >
       <div className="hero__body">
-        <div className="hero__content" key={current.id}>
+        {/*
+         * key 를 바꿔 매 슬라이드마다 새로 그리게 하면 .animate-rise(아래에서 올라오는 효과)가
+         * 자동으로 다시 재생됩니다. GSAP 스크롤 효과와는 겹치므로 data-reveal="off" 로 제외합니다.
+         */}
+        <div
+          className="hero__content animate-rise"
+          key={current.id}
+          data-reveal="off"
+        >
           <p className="hero__kicker">
             현재 전시
             {current.place !== '' && (
@@ -83,35 +92,63 @@ export default function HeroSlider({ items }: HeroSliderProps) {
 
         {total > 1 && (
           <div className="hero__controls">
-            <button
-              type="button"
-              className="icon-btn"
-              aria-label="이전 전시"
-              onClick={() => move(-1)}
-            >
-              <span aria-hidden="true">←</span>
-            </button>
-            <button
-              type="button"
-              className="icon-btn"
-              aria-label="다음 전시"
-              onClick={() => move(1)}
-            >
-              <span aria-hidden="true">→</span>
-            </button>
+            <div className="hero__dots">
+              {items.map((item, dotIndex) => (
+                <button
+                  key={item.id}
+                  type="button"
+                  className="hero__dot"
+                  aria-label={`${dotIndex + 1}번째 전시 보기`}
+                  aria-current={dotIndex === index ? 'true' : undefined}
+                  onClick={() => setIndex(dotIndex)}
+                >
+                  <span aria-hidden="true" />
+                </button>
+              ))}
+            </div>
+
             <p className="hero__counter">
               {index + 1} / {total}
             </p>
+
+            <div className="hero__nav">
+              <button
+                type="button"
+                className="icon-btn"
+                aria-label="이전 전시"
+                onClick={() => move(-1)}
+              >
+                <ChevronLeftIcon className="icon-16" />
+              </button>
+              <button
+                type="button"
+                className="icon-btn"
+                aria-label="다음 전시"
+                onClick={() => move(1)}
+              >
+                <ChevronRightIcon className="icon-16" />
+              </button>
+            </div>
           </div>
         )}
       </div>
 
+      {/*
+       * 이미지는 모두 겹쳐 두고 활성 슬라이드만 opacity 1 — 전환할 때 서로 부드럽게
+       * 교차 페이드됩니다(미리 로드되어 있어 깜빡임도 없습니다).
+       */}
       <div className="hero__stage">
-        <img
-          src={current.imageUrl || EXHIBITION_PLACEHOLDER}
-          alt=""
-          className="hero__image"
-        />
+        {items.map((item, slideIndex) => (
+          <img
+            key={item.id}
+            src={item.imageUrl || EXHIBITION_PLACEHOLDER}
+            alt=""
+            aria-hidden={slideIndex !== index}
+            className={
+              slideIndex === index ? 'hero__image is-active' : 'hero__image'
+            }
+          />
+        ))}
       </div>
     </section>
   )

@@ -118,3 +118,41 @@ export function ArrowLeftIcon({ className = 'icon-24' }: IconProps) {
     </svg>
   )
 }
+
+/* --------------------------------------------------------------------------
+   히어로 슬라이더 조작 — 원본 사이트와 같은 꺾쇠(‹ ›) path · 굵기 1.8
+   -------------------------------------------------------------------------- */
+
+export function ChevronLeftIcon({ className = 'icon-24' }: IconProps) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      aria-hidden="true"
+      className={className}
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={1.8}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M15 5l-7 7 7 7" />
+    </svg>
+  )
+}
+
+export function ChevronRightIcon({ className = 'icon-24' }: IconProps) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      aria-hidden="true"
+      className={className}
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={1.8}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M9 5l7 7-7 7" />
+    </svg>
+  )
+}

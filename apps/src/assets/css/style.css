@@ -347,28 +347,94 @@
   margin-top: 6.4rem;
 }
 
+/* 점 인디케이터 — 점 하나는 2.8rem × 4.4rem 버튼(누를 수 있는 영역) 안의 1rem 원 */
+.hero__dots {
+  display: flex;
+  align-items: center;
+}
+
+.hero__dot {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 2.8rem;
+  height: 4.4rem;
+}
+
+.hero__dot span {
+  display: block;
+  width: 1rem;
+  height: 1rem;
+  border-radius: 9999px;
+  background: rgb(51 51 51 / 0.25);
+  transition: background-color var(--dur) var(--ease);
+}
+
+.hero__dot:hover span {
+  background: rgb(51 51 51 / 0.6);
+}
+
+.hero__dot[aria-current] span {
+  background: var(--color-ink);
+}
+
 .hero__counter {
   font-size: var(--text-sm);
   font-variant-numeric: tabular-nums;
   color: var(--color-ink-soft);
 }
 
+.hero__nav {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+}
+
 .hero__stage {
+  /* 아래 패딩은 이미지 크기 계산에도 쓰입니다 — 반응형에서는 이 변수만 바꿉니다. */
+  --hero-stage-pad: 5.6rem;
+  /* 절대 배치된 이미지의 기준 상자 */
+  position: relative;
   display: grid;
   place-items: center;
   /* .hero 가 화면 높이를 채우므로 여기는 최소 높이만 잡아 둡니다. */
   min-height: 57.6rem;
-  padding: 5.6rem;
+  padding: var(--hero-stage-pad);
   background: #f8f8f8;
 }
 
+/*
+ * 이미지 전환은 부드러운 교차 페이드 — 모든 이미지를 겹쳐 두고 활성 슬라이드만
+ * opacity 1 로 바꿉니다(미리 로드되어 있어 깜빡임 없이 넘어갑니다).
+ *
+ * 흐름에서 빼내 절대 배치한 이유: 그리드 아이템으로 두면 세로로 긴 이미지의 고유
+ * 높이가 행 높이를 밀어내고, 높이가 내용으로 정해지는 트랙에서는 max-height: 100%
+ * 기준이 잡히지 않아 무시됩니다(600 × 1500 이미지 → 히어로가 1601px 로 늘어 화면
+ * 밖으로 넘침). 절대 배치는 기준 상자(스테이지 패딩 박스)가 확정되므로
+ * max-width · max-height 가 살아나고, inset: 0 + margin: auto 로 가운데 정렬됩니다.
+ */
 .hero__image {
+  position: absolute;
+  inset: 0;
+  margin: auto;
   width: auto;
-  max-width: 100%;
-  /* 스테이지 높이(패딩 제외)를 넘지 않는 선에서 최대한 크게 — 비율 유지 */
-  max-height: 100%;
+  height: auto;
+  /* 스테이지 안쪽(패딩 제외)을 넘지 않는 선에서 최대한 크게 — 비율 유지 */
+  max-width: calc(100% - var(--hero-stage-pad) * 2);
+  max-height: calc(100% - var(--hero-stage-pad) * 2);
   object-fit: contain;
-  animation: fade-in 0.3s ease-out both;
+  opacity: 0;
+  transition: opacity 0.7s var(--ease-rise);
+}
+
+.hero__image.is-active {
+  opacity: 1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero__image {
+    transition: none;
+  }
 }
 
 .hero__placeholder {
@@ -1410,6 +1476,13 @@ a.notice-detail__file_name:focus-visible {
 .icon-20 {
   width: 2rem;
   height: 2rem;
+  flex-shrink: 0;
+}
+
+/* 히어로 조작 꺾쇠 — 원본 h-4 w-4 = 16px */
+.icon-16 {
+  width: 1.6rem;
+  height: 1.6rem;
   flex-shrink: 0;
 }
 
@@ -3233,8 +3306,9 @@ a.notice-detail__file_name:focus-visible {
   }
 
   .hero__stage {
+    --hero-stage-pad: 4rem;
     min-height: 41.6rem;
-    padding: 4rem;
+    padding: var(--hero-stage-pad);
   }
 
   .exhibition-grid {
@@ -3403,8 +3477,9 @@ a.notice-detail__file_name:focus-visible {
   }
 
   .hero__stage {
+    --hero-stage-pad: 2.4rem;
     min-height: 32rem;
-    padding: 2.4rem;
+    padding: var(--hero-stage-pad);
   }
 
   .exhibition-grid {
