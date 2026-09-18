@@ -3,7 +3,7 @@ import type { CSSProperties } from 'react'
 import { fetchActivePopups, type ActivePopup } from '@/api/popups'
 
 /**
- * 공개 사이트 팝업 레이어.
+ * 공개 사이트 팝업 레이어 — 메인(/)에서만 씁니다.
  *
  * 관리자 > 팝업에서 [사용] 으로 두고 노출기간 안에 들어온 팝업을 띄웁니다.
  *   - 정렬 순서가 작은 것부터 한 장씩 차례로 보여 줍니다.
@@ -77,8 +77,10 @@ export default function PopupLayer() {
 
         setPopups(items.filter((item) => !closed.includes(item.id)))
       })
-      .catch(() => {
+      .catch((err: unknown) => {
         // 팝업이 없는 것으로 보고 넘어갑니다. (공개 화면이 깨지지 않게)
+        // 조용히 넘기면 원인을 못 찾으므로 콘솔에는 남깁니다.
+        console.warn('[popup] 팝업을 불러오지 못했습니다.', err)
       })
 
     return () => {

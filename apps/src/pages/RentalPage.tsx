@@ -29,7 +29,7 @@ export default function RentalPage() {
 
   return (
     <>
-      <PageHeader title="대관" lede={pageRentalLede} />
+      <PageHeader title="대관신청" lede={pageRentalLede} />
 
       <section id="rental" className="section scroll-anchor">
         {/* 01 ~ 04 */}

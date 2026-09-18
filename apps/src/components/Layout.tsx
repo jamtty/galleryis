@@ -1,5 +1,6 @@
 import { useEffect } from 'react'
 import { Outlet, useLocation } from 'react-router-dom'
+import { PATHS } from '@/routes/paths'
 import { useScrollReveal } from '../hooks/useScrollReveal'
 import BackToTop from './BackToTop'
 import Footer from './Footer'
@@ -8,6 +9,12 @@ import PopupLayer from './PopupLayer'
 
 export default function Layout() {
   const { pathname } = useLocation()
+
+  /**
+   * 메인 화면인지 — 팝업은 여기서만 띄웁니다.
+   * (`/index.html` 로 들어온 경우도 메인으로 봅니다)
+   */
+  const isHomePage = pathname === PATHS.home || pathname.endsWith('/index.html')
 
   // 라우트 이동 시 스크롤을 최상단으로 되돌립니다.
   useEffect(() => {
@@ -33,8 +40,8 @@ export default function Layout() {
 
       <Footer />
 
-      {/* 관리자 > 팝업에서 [사용] 으로 둔 팝업을 띄웁니다. */}
-      <PopupLayer />
+      {/* 관리자 > 팝업에서 [사용] 으로 둔 팝업 — 메인 화면에서만 띄웁니다. */}
+      {isHomePage && <PopupLayer />}
 
       {/* 우측 하단 맨 위로 버튼 (모든 공개 페이지 공통) */}
       <BackToTop />

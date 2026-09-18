@@ -107,12 +107,12 @@ export type NavItem = {
   also?: readonly string[]
 }
 
-/** 상단 주요 메뉴 — 원본: 전시 · 갤러리 이즈 · 전시장 · 대관 · 소식 */
+/** 상단 주요 메뉴 — 원본: 전시 · 갤러리 이즈 · 전시장 · 대관신청 · 소식 */
 export const NAV_ITEMS: readonly NavItem[] = [
   { id: 'exhibitions', label: '전시', to: PATHS.exhibitions },
   { id: 'about', label: '갤러리 이즈', to: PATHS.about, also: [PATHS.visit] },
   { id: 'halls', label: '전시장', to: PATHS.halls },
-  { id: 'rental', label: '대관', to: PATHS.rental },
+  { id: 'rental', label: '대관신청', to: PATHS.rental },
   { id: 'notices', label: '소식', to: PATHS.notices },
 ]
 

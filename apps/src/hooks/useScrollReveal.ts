@@ -50,7 +50,7 @@ const SINGLES: { selector: string; y?: number; scale?: number }[] = [
   // 갤러리 이즈 (소개)
   { selector: '.about-intro', y: 28 },
   { selector: '.about-info', y: 28 },
-  // 대관
+  // 대관신청
   { selector: '.rental-schedule', y: 24 },
   { selector: '.rental-form', y: 24 },
   { selector: '.rental-received', y: 20 },
