@@ -24,6 +24,8 @@ export const PATHS = {
   admin: '/admin',
   adminLogin: '/admin/login',
   adminRentals: '/admin/rentals',
+  /** 관리자 — 대리 신청 (전화 · 방문 접수). ?hall=hall1&week=YYYY-MM-DD */
+  adminRentalDesk: '/admin/rentals/new',
   /** 관리자 — 대관 신청서 수정 */
   adminRentalEdit: '/admin/rentals/edit/:id',
   adminSchedule: '/admin/schedule',

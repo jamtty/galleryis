@@ -35,8 +35,27 @@ if (!is_array($payload)) {
     json_error('신청 데이터를 읽을 수 없습니다.', 422);
 }
 
+// 대리 접수 행인지 먼저 봅니다 — 그런 행은 신청자 정보·장르가 비어 있을 수
+// 있어서, 입력 검증이 그것을 알고 있어야 합니다. (전화로 주만 잡아 둔 건)
+$rowStmt = db()->prepare('SELECT * FROM ' . RENTAL_TABLE . ' WHERE wr_id = ?');
+$rowStmt->execute([$wrId]);
+$row = $rowStmt->fetch();
+
+if (!$row) {
+    json_error('해당 신청을 찾을 수 없습니다.', 404);
+}
+
+$isDesk = rental_is_desk_row($row);
+
 // 레거시 신청서에는 작품 수·참여작가수가 없으므로 필수로 보지 않습니다.
-$input = rental_booking_input($payload, false);
+$input = rental_booking_input($payload, false, $isDesk);
+
+// 대리 접수 건에서 메모만 고쳐 저장한 경우처럼 신청자 이름이 없으면,
+// 관리자 목록의 '신청자' 열에 남는 이름표(wr_subject)를 그대로 둡니다.
+if ($isDesk && trim((string) $input['name']) === '') {
+    $input['title'] = '대리 접수';
+}
+
 $uploads = rental_booking_uploads();
 
 $keep = [];
@@ -47,14 +66,6 @@ if (isset($_POST['keep']) && is_array($_POST['keep'])) {
 
 try {
     $pdo = db();
-
-    $stmt = $pdo->prepare('SELECT wr_id, wr_8, wr_11 FROM ' . RENTAL_TABLE . ' WHERE wr_id = ?');
-    $stmt->execute([$wrId]);
-    $row = $stmt->fetch();
-
-    if (!$row) {
-        json_error('해당 신청을 찾을 수 없습니다.', 404);
-    }
 
     // 남길 첨부와 새 첨부를 합쳐 입력란별 개수를 넘지 않는지 확인합니다.
     $existing = ['bio' => 0, 'portfolio' => 0];

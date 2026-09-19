@@ -49,11 +49,12 @@ function rental_normalize_files($key)
  * @param array $payload
  * @param bool  $requireCounts 작품 수·참여작가수를 필수로 볼지
  *                            (관리자 수정은 레거시 행을 고려해 false)
+ * @param bool  $allowEmptyApplicant 신청자 정보·장르가 통째로 비어 있어도 되는지
+ *                            (대리 접수 행의 관리자 수정 — 전화로만 받아 둔 주)
  * @return array
  */
-function rental_booking_input(array $payload, $requireCounts = true)
-{
-    $applicant = (isset($payload['applicant']) && is_array($payload['applicant'])) ? $payload['applicant'] : [];
+function rental_booking_input(array $payload, $requireCounts = true, $allowEmptyApplicant = false)
+{    $applicant = (isset($payload['applicant']) && is_array($payload['applicant'])) ? $payload['applicant'] : [];
     $exhibition = (isset($payload['exhibition']) && is_array($payload['exhibition'])) ? $payload['exhibition'] : [];
 
     $hallId = isset($payload['hall_id']) ? (string) $payload['hall_id'] : '';
@@ -85,15 +86,31 @@ function rental_booking_input(array $payload, $requireCounts = true)
     $workCount = isset($exhibition['work_count']) ? (int) $exhibition['work_count'] : 0;
     $termsVersion = isset($payload['terms_version']) ? trim((string) $payload['terms_version']) : '';
 
-    if ($name === '' || $email === '' || $phone === '') {
-        json_error('신청자 정보(이름 · 이메일 · 연락처)를 입력해 주세요.', 422);
+    // 대리 접수 건은 신청자에게 물어보지 않고 주만 잡아 둔 자리라, 통째로 비어
+    // 있으면 그대로 둡니다. 하나라도 적혀 있으면 아래 검사는 그대로 돕니다.
+    $applicantBlank = $name === '' && $email === '' && $phone === ''
+        && $postcode === '' && $address1 === '' && $address2 === '';
+
+    if (!$allowEmptyApplicant || !$applicantBlank) {
+        if ($name === '' || $email === '' || $phone === '') {
+            json_error('신청자 정보(이름 · 이메일 · 연락처)를 입력해 주세요.', 422);
+        }
+
+        if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            json_error('이메일 형식이 올바르지 않습니다.', 422);
+        }
+
+        if ($postcode === '' || $address1 === '') {
+            json_error('주소를 입력해 주세요.', 422);
+        }
+
+        if ($address2 === '') {
+            json_error('상세 주소를 입력해 주세요.', 422);
+        }
     }
 
-    if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-        json_error('이메일 형식이 올바르지 않습니다.', 422);
-    }
-
-    if (!isset(RENTAL_KINDS[$kindKey])) {
+    // 대리 접수 건은 전시구분을 아직 모를 수 있습니다 — 빈 값이면 그대로 둡니다.
+    if (!isset(RENTAL_KINDS[$kindKey]) && !($allowEmptyApplicant && $kindKey === '')) {
         json_error('전시구분을 선택해 주세요.', 422);
     }
 
@@ -105,47 +122,46 @@ function rental_booking_input(array $payload, $requireCounts = true)
         json_error('작품 수를 입력해 주세요.', 422);
     }
 
-    if ($postcode === '' || $address1 === '') {
-        json_error('주소를 입력해 주세요.', 422);
-    }
-
-    if ($address2 === '') {
-        json_error('상세 주소를 입력해 주세요.', 422);
-    }
-
+    // 장르 — 대리 접수 건은 아직 모를 수 있습니다. (빈 값이면 그대로 둡니다.
+    //  '기타'를 골랐는데 직접 입력이 비어 있는 것은 대리 접수도 그대로 막습니다)
     if ($genre === '') {
-        json_error('전시장르를 선택해 주세요.', 422);
-    }
-
-    if ($genre === 'other' && $genreOther === '') {
+        if (!$allowEmptyApplicant) {
+            json_error('전시장르를 선택해 주세요.', 422);
+        }
+    } elseif ($genre === 'other' && $genreOther === '') {
         json_error('장르를 직접 입력해 주세요.', 422);
     }
 
-    if ($termsVersion === '') {
+    if ($termsVersion === '' && !$allowEmptyApplicant) {
         json_error('대관 유의사항에 동의해 주세요.', 422);
     }
 
     $genreText = $genre === 'other' ? $genreOther : $genre;
+
+    // euc-kr 테이블이라 이모지·줄표가 섞이면 저장이 통째로 막힙니다.
+    // (lib/rental.php 의 rental_legacy_text)
+    $name = rental_legacy_text($name);
+    $genreText = rental_legacy_text($genreText);
 
     return [
         'hall' => $hallLabel,
         'hall_id' => $hallId,
         'week_start' => $weekStart,
         'name' => $name,
-        'email' => $email,
-        'phone' => $phone,
-        'postcode' => $postcode,
-        'address1' => $address1,
-        'address2' => $address2,
+        'email' => rental_legacy_text($email),
+        'phone' => rental_legacy_text($phone),
+        'postcode' => rental_legacy_text($postcode),
+        'address1' => rental_legacy_text($address1),
+        'address2' => rental_legacy_text($address2),
         // 레거시 데이터와 컬럼 의미를 맞춥니다. 관리자 목록의 '신청자' 열이 wr_subject 입니다.
         // 전시구분·전시장은 wr_5 / wr_8 에 따로 저장됩니다.
         'title' => $name,
-        'kind' => RENTAL_KINDS[$kindKey],
+        'kind' => isset(RENTAL_KINDS[$kindKey]) ? RENTAL_KINDS[$kindKey] : '',
         'kind_key' => $kindKey,
         'genre' => $genreText,
         'genre_key' => $genre,
-        'genre_other' => $genreOther,
-        'memo' => $memo,
+        'genre_other' => rental_legacy_text($genreOther),
+        'memo' => rental_legacy_text($memo),
         'artist_count' => $artistCount,
         'work_count' => $workCount,
         'terms_version' => $termsVersion,

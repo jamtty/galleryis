@@ -130,13 +130,17 @@ export default function AdminRentalEditPage() {
   const initial: RentalFormInitial = {
     id: detail.id,
     hall: detail.hall,
-    name: detail.applicant.name,
+    // 대리 접수 건에는 신청자가 없습니다 — '신청자' 열에 보이는 '대리 접수' 는
+    // 행 이름표라서, 폼에는 빈 칸으로 두고 나중에 적을 수 있게 합니다.
+    name: detail.desk ? '' : detail.applicant.name,
     email: detail.applicant.email,
     phone: detail.applicant.phone,
     postcode: detail.applicant.postcode,
     address1: detail.applicant.address1,
     address2: detail.applicant.address2,
-    kind: detail.exhibition.kind || 'solo',
+    kind: detail.desk && detail.exhibition.kind_label === ''
+      ? ''
+      : detail.exhibition.kind || 'solo',
     genre: detail.exhibition.genre,
     artistCount:
       detail.exhibition.artist_count > 0
@@ -155,6 +159,18 @@ export default function AdminRentalEditPage() {
         <h2 className="adm_section_title">
           {detail.hall} · {formatDotRange(detail.weekStart, detail.weekEnd)}
         </h2>
+
+        {/* 대리 신청 — 직원이 전화·방문으로 대신 접수한 건이라 신청자 정보가
+            비어 있습니다. 누가 입력했는지와, 나중에 채워 넣으면 된다는 것을
+            함께 알려 줍니다. */}
+        {detail.desk && (
+          <p className="adm_table_notice">
+            대리 신청 — 전화 · 방문으로 직원이 대신 접수한 건입니다. 신청자
+            정보와 전시 내용은 비워 둔 채 메모만 고쳐 저장해도 되고, 신청자가
+            정식 신청서를 내면 이 화면에서 채워 넣으면 됩니다.
+            {detail.createdBy !== '' && ` (입력: ${detail.createdBy})`}
+          </p>
+        )}
 
         {/* 대관 상태 — 신청 내용과 별개라 고르면 바로 저장합니다. */}
         <div className="adm_form_row adm_form_row_col adm_status_field">
@@ -194,6 +210,7 @@ export default function AdminRentalEditPage() {
           weekEnd={detail.weekEnd}
           onCancel={back}
           hideTerms
+          desk={detail.desk}
           onDone={() => setDone('수정되었습니다.')}
           initial={initial}
         />

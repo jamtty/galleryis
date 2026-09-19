@@ -8,7 +8,7 @@ import RentalSchedule from '@/components/rental/RentalSchedule'
  * (전시기간 검색 · 대관신청 구분 필터 · 전시장별 주간 표)
  *
  * 관리자 화면에서는 칸을 누르면 그 칸의 화면으로 바로 넘어갑니다. (같은 창)
- *   · 신청가능 → 대관 신청서 작성
+ *   · 신청가능 → 대리 신청 (전화 · 방문으로 받은 주를 직원이 대신 접수)
  *   · 심사중 · 대관완료 → 그 신청서 수정
  */
 export default function AdminRentalSchedulePage() {
@@ -17,10 +17,11 @@ export default function AdminRentalSchedulePage() {
       <section className="adm_section">
         <h2 className="adm_section_title">전시 기간 확인 및 신청</h2>
         <p className="adm_table_notice">
+          신청가능 칸을 누르면 대리 신청(전화 · 방문 접수) 화면이 열립니다.
           심사중 · 대관완료 칸을 누르면 그 대관 신청서로 넘어갑니다.
         </p>
         <div className="adm_schedule">
-          <RentalSchedule linkRequests defaultUnit="2y" />
+          <RentalSchedule linkRequests deskApply defaultUnit="2y" />
         </div>
       </section>
     </AdminPage>

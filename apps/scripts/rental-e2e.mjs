@@ -181,7 +181,7 @@ function bookingPayload({ hallId, weekStart, kind = 'thesis', genre = '서양화
       genre_other: '',
       artist_count: undefined,
       work_count: 5,
-      memo: '전시명 : [검증] E2E 전시\n작가명 : 검증 작가',
+      memo: '전시명 : [검증] E2E 전시 — 줄표\n작가명 : 검증 작가',
     },
     terms_version: '2026-08-17',
   }
@@ -378,6 +378,18 @@ async function main() {
         '전시명·작가명이 메모에 남음',
         (data.exhibition?.memo ?? '').includes('전시명'),
         JSON.stringify((data.exhibition?.memo ?? '').split('\n')[0]),
+      )
+
+      // g4_write_order 는 euc-kr 이라, euc-kr 에 없는 글자가 하나라도 섞이면 MySQL 이
+      // 저장을 통째로 거부합니다(1366). 신청자가 전시명에 줄표를 쓰는 일은 드물지
+      // 않으므로, 그때도 200 으로 저장되고 글자만 다듬어지는지 봅니다.
+      // (backend/lib/rental.php 의 rental_legacy_text)
+      const memoText = data.exhibition?.memo ?? ''
+
+      check(
+        'euc-kr 밖 글자(줄표)가 저장을 막지 않음',
+        memoText.includes(' - ') && !memoText.includes('\u2014'),
+        JSON.stringify(memoText.split('\n')[0]),
       )
 
       check(

@@ -1302,6 +1302,12 @@ select.adm_btn_secondary {
 .adm_form_input:focus {
   border-color: #2563eb;
 }
+/* 대리 신청 — 일정에서 눌러 온 주 · 전시장은 고칠 수 없습니다. */
+.adm_form_input[readonly] {
+  background: #f3f4f6;
+  color: #6b7280;
+  cursor: default;
+}
 .adm_form_inline {
   display: flex;
   align-items: center;

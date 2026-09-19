@@ -161,7 +161,9 @@
   font-size: var(--text-base);
 }
 .rental-row__field textarea {
-  min-height: 10rem;
+  /* 전화로 받아 적은 메모처럼 긴 글도 한눈에 보이도록 넉넉하게 둡니다.
+     (이 메모 칸은 신청서에 남아 있는 메모가 있을 때 — 사실상 관리자 수정 화면에서만 — 나옵니다) */
+  min-height: 20rem;
   padding: 1.2rem;
   line-height: 1.6;
   resize: none;

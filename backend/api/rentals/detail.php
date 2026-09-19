@@ -10,7 +10,8 @@
  *   applicant: { name, email, phone, postcode, address1, address2 },
  *   exhibition: { kind, kind_label, genre, memo, artist_count, work_count },
  *   files: { bio: [{no, name, size, url}], portfolio: [...] },
- *   status, createdAt
+ *   status, createdAt,
+ *   desk, createdBy    ← 대리 신청(직원이 대신 접수) 여부와 입력자
  * }
  */
 declare(strict_types=1);
@@ -98,6 +99,10 @@ try {
         'files' => $files,
         'status' => ((string) $row['wr_13'] === '2') ? 'approved' : 'pending',
         'createdAt' => (string) $row['wr_datetime'],
+        // 대리 신청 — 직원이 전화·방문으로 대신 접수한 건. 신청자 정보가 없습니다.
+        // (wr_subject = '대리 접수', rt_created_by = 입력한 관리자 id)
+        'desk' => rental_is_desk_row($row),
+        'createdBy' => isset($row['rt_created_by']) ? (string) $row['rt_created_by'] : '',
     ]);
 } catch (Throwable $e) {
     json_error('신청 내용을 불러오지 못했습니다.', 500);

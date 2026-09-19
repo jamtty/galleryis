@@ -51,6 +51,12 @@ type RentalFormProps = {
    * 신청자에게 보여 주는 안내·동의 영역이라 관리자에게는 필요 없습니다.
    */
   hideTerms?: boolean
+  /**
+   * 대리 접수(직원이 전화·방문으로 대신 받아 둔 건) — 신청자 정보도 전시 내용도
+   * 아직 모를 수 있습니다. 통째로 비어 있는 칸은 그대로 두고 저장할 수 있게 하고
+   * (메모만 고쳐 저장하는 경우), 하나라도 적혀 있으면 형식 검사는 그대로 합니다.
+   */
+  desk?: boolean
 }
 
 const POSTCODE_SRC =
@@ -182,6 +188,7 @@ export default function RentalForm({
   onDone,
   initial,
   hideTerms = false,
+  desk = false,
 }: RentalFormProps) {
   const editing = initial !== undefined
   const [savedEmailId, savedEmailDomain] = splitEmail(initial?.email ?? '')
@@ -212,9 +219,17 @@ export default function RentalForm({
   const [address2, setAddress2] = useState(initial?.address2 ?? '')
 
   // 전시 정보
-  const [kind, setKind] = useState(initial?.kind || 'solo')
+  // 대리 접수는 전시구분을 아직 모를 수 있어 빈 값('미정')으로 시작합니다 —
+  // 저장할 때 '개인전' 같은 기본값을 지어내지 않기 위해서입니다.
+  const [kind, setKind] = useState(initial?.kind || (desk ? '' : 'solo'))
   const [genre, setGenre] = useState(
-    initial === undefined ? '' : savedGenreKnown ? initial.genre : 'other',
+    initial === undefined
+      ? ''
+      : desk && initial.genre === ''
+        ? ''
+        : savedGenreKnown
+          ? initial.genre
+          : 'other',
   )
   const [genreOther, setGenreOther] = useState(
     initial === undefined || savedGenreKnown ? '' : initial.genre,
@@ -228,7 +243,7 @@ export default function RentalForm({
   const [memoFields] = useState(() => unpackRentalMemo(initial?.memo))
   const [exhibitionTitle, setExhibitionTitle] = useState(memoFields.title)
   const [exhibitionArtist, setExhibitionArtist] = useState(memoFields.artist)
-  /** 옛 신청서에 남아 있던 메모 — 있을 때만 보여 주고 지우지 않습니다 */
+  /** 관리자 확인용 메모 — 신청서에 남아 있던 나머지 줄 (그대로 보여 주고 지우지 않습니다) */
   const [memoRest, setMemoRest] = useState(memoFields.rest)
 
   const [bio, setBio] = useState<File[]>([])
@@ -300,43 +315,62 @@ export default function RentalForm({
   const problems = () => {
     const list: { message: string; field: string }[] = []
 
-    if (!name.trim()) {
-      list.push({ message: '이름을 입력해 주세요.', field: 'rq-name' })
-    }
+    // 대리 접수 건은 신청자에게 묻지 않고 주만 잡아 둔 자리라, 통째로 비어 있으면
+    // 그대로 저장할 수 있게 합니다. (메모만 고쳐 저장하는 경우) 하나라도 적혀
+    // 있으면 아래 형식 검사는 그대로 돕니다.
+    const applicantBlank =
+      !name.trim() &&
+      !emailId.trim() &&
+      !domain.trim() &&
+      !phone1 &&
+      !phone2.trim() &&
+      !phone3.trim() &&
+      !postcode.trim() &&
+      !address1.trim() &&
+      !address2.trim()
 
-    if (!emailId.trim() || !domain.trim()) {
-      list.push({ message: '이메일을 입력해 주세요.', field: 'rq-email-id' })
-    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-      list.push({
-        message: '이메일 형식이 올바르지 않습니다.',
-        field: 'rq-email-id',
-      })
-    }
+    if (!(desk && applicantBlank)) {
+      if (!name.trim()) {
+        list.push({ message: '이름을 입력해 주세요.', field: 'rq-name' })
+      }
 
-    if (!phone1) {
-      list.push({
-        message: '연락처 앞자리를 선택해 주세요.',
-        field: 'rq-phone1',
-      })
-    }
+      if (!emailId.trim() || !domain.trim()) {
+        list.push({ message: '이메일을 입력해 주세요.', field: 'rq-email-id' })
+      } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+        list.push({
+          message: '이메일 형식이 올바르지 않습니다.',
+          field: 'rq-email-id',
+        })
+      }
 
-    if (!phone2.trim()) {
-      list.push({ message: '연락처를 입력해 주세요.', field: 'rq-phone2' })
-    }
+      if (!phone1) {
+        list.push({
+          message: '연락처 앞자리를 선택해 주세요.',
+          field: 'rq-phone1',
+        })
+      }
 
-    if (!phone3.trim()) {
-      list.push({ message: '연락처를 입력해 주세요.', field: 'rq-phone3' })
-    }
+      if (!phone2.trim()) {
+        list.push({ message: '연락처를 입력해 주세요.', field: 'rq-phone2' })
+      }
 
-    if (!postcode.trim() || !address1.trim()) {
-      list.push({
-        message: '주소 검색으로 주소를 입력해 주세요.',
-        field: 'rq-address-btn',
-      })
-    }
+      if (!phone3.trim()) {
+        list.push({ message: '연락처를 입력해 주세요.', field: 'rq-phone3' })
+      }
 
-    if (!address2.trim()) {
-      list.push({ message: '상세 주소를 입력해 주세요.', field: 'rq-address2' })
+      if (!postcode.trim() || !address1.trim()) {
+        list.push({
+          message: '주소 검색으로 주소를 입력해 주세요.',
+          field: 'rq-address-btn',
+        })
+      }
+
+      if (!address2.trim()) {
+        list.push({
+          message: '상세 주소를 입력해 주세요.',
+          field: 'rq-address2',
+        })
+      }
     }
 
     // 관리자 수정 모드는 레거시 신청서에 없는 값을 비워 둘 수 있게 통과시킵니다.
@@ -354,15 +388,23 @@ export default function RentalForm({
       })
     }
 
-    if (!genre) {
-      list.push({ message: '전시장르를 선택해 주세요.', field: 'rq-genre' })
-    }
+    if (genre === '' || genreOther === '') {
+      // 대리 접수 건은 장르를 아직 모를 수 있습니다 — '기타'만 골라 두고 내용이
+      // 비어 있으면 빈 값으로 보내, 저장할 때 장르를 지어내지 않게 합니다.
+      const genreBlank = desk && genreOther.trim() === ''
 
-    if (genre === 'other' && !genreOther.trim()) {
-      list.push({
-        message: '장르를 직접 입력해 주세요.',
-        field: 'rq-genre-other',
-      })
+      if (!genreBlank) {
+        if (!genre) {
+          list.push({ message: '전시장르를 선택해 주세요.', field: 'rq-genre' })
+        }
+
+        if (genre === 'other' && !genreOther.trim()) {
+          list.push({
+            message: '장르를 직접 입력해 주세요.',
+            field: 'rq-genre-other',
+          })
+        }
+      }
     }
 
     // 관리자 수정 모드는 이미 접수된 건이라 동의를 다시 받지 않습니다.
@@ -568,6 +610,11 @@ export default function RentalForm({
 
     setSending(true)
 
+    // 대리 접수 건은 장르를 아직 모를 수 있습니다 — '기타'만 골라 두고 내용이
+    // 비어 있으면 빈 값으로 보냅니다. (서버가 빈 장르를 그대로 둡니다)
+    const genreValue =
+      desk && genre === 'other' && genreOther.trim() === '' ? '' : genre
+
     const payload = {
       hall_id: hallId,
       week_start: weekStart,
@@ -583,8 +630,8 @@ export default function RentalForm({
         kind,
         artist_count: kind === 'group' ? Number(artistCount) : undefined,
         work_count: Number(workCount),
-        genre,
-        genre_other: genre === 'other' ? genreOther : undefined,
+        genre: genreValue,
+        genre_other: genreValue === 'other' ? genreOther : undefined,
         // 공개 신청 폼과 같은 모양(`전시명 : …` / `작가명 : …`)으로 담습니다.
         memo: packRentalMemo({
           title: exhibitionTitle,
@@ -966,13 +1013,30 @@ export default function RentalForm({
           <div className="rental-row">
             <span className="rental-row__label" id="lbl-kind">
               <i className="rental-dot" aria-hidden="true" />
-              전시구분 <span className="rental-field__req">*</span>
+              전시구분{' '}
+              {!desk && <span className="rental-field__req">*</span>}
             </span>
             <div
               className="rental-row__field rental-choice"
               role="radiogroup"
               aria-labelledby="lbl-kind"
             >
+              {/* 대리 접수는 전화로 물어보지 않은 값이라 '미정'으로 둘 수 있습니다. */}
+              {desk && (
+                <button
+                  type="button"
+                  role="radio"
+                  aria-checked={kind === ''}
+                  className={
+                    kind === ''
+                      ? 'rental-choice__btn is-on'
+                      : 'rental-choice__btn'
+                  }
+                  onClick={() => setKind('')}
+                >
+                  미정
+                </button>
+              )}
               {RENTAL_KINDS.map((item) => (
                 <button
                   key={item.value}
@@ -1196,8 +1260,11 @@ export default function RentalForm({
             </div>
           </div>
 
-          {/* 예전 신청서에 사람이 적어 둔 메모 — 있으면 그대로 보여 줍니다 */}
-          {memoRest !== '' && (
+          {/* 관리자 확인용 메모.
+              관리자 수정 화면에서는 늘 보입니다 — 비워 두고 접수한 대리 신청도
+              나중에 여기에 적을 수 있어야 합니다. 공개 신청 폼에서는 나오지 않고,
+              신청서에 이미 남아 있는 메모는 지우지 않고 그대로 채워 둡니다. */}
+          {(editing || memoRest !== '') && (
             <label className="rental-row" htmlFor="rq-memo">
               <span className="rental-row__label">
                 <i className="rental-dot" aria-hidden="true" />
@@ -1209,6 +1276,10 @@ export default function RentalForm({
                   value={memoRest}
                   onChange={(e) => setMemoRest(e.target.value)}
                 />
+                <span className="rental-field__hint">
+                  전화로 들은 내용 등 관리자 확인용 메모입니다. 비워 두어도
+                  됩니다.
+                </span>
               </span>
             </label>
           )}

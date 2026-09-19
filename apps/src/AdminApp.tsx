@@ -10,6 +10,7 @@ import AdminNoticeFormPage from '@/pages/admin/AdminNoticeFormPage'
 import AdminNoticePage from '@/pages/admin/AdminNoticePage'
 import AdminPopupFormPage from '@/pages/admin/AdminPopupFormPage'
 import AdminPopupPage from '@/pages/admin/AdminPopupPage'
+import AdminRentalDeskPage from '@/pages/admin/AdminRentalDeskPage'
 import AdminRentalEditPage from '@/pages/admin/AdminRentalEditPage'
 import AdminRentalRequestPage from '@/pages/admin/AdminRentalRequestPage'
 import AdminRentalSchedulePage from '@/pages/admin/AdminRentalSchedulePage'
@@ -34,6 +35,8 @@ export default function AdminApp() {
           {/* 관리자 진입 시 바로 대관 신청 목록으로 보냅니다. (대시보드 없음) */}
           <Route index element={<Navigate to={PATHS.adminRentals} replace />} />
           <Route path="rentals" element={<AdminRentalRequestPage />} />
+          {/* 일정에서 신청가능 칸을 누르면 열리는 대리 신청 (전화·방문 접수) */}
+          <Route path="rentals/new" element={<AdminRentalDeskPage />} />
           <Route path="rentals/edit/:id" element={<AdminRentalEditPage />} />
           <Route path="schedule" element={<AdminRentalSchedulePage />} />
           <Route path="exhibitions" element={<AdminExhibitionPage />} />

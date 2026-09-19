@@ -47,6 +47,13 @@ type RentalScheduleProps = {
    * 신청서 수정은 관리자만 볼 수 있어 공개 화면에서는 켜지 않습니다.
    */
   linkRequests?: boolean
+  /**
+   * 빈 칸(신청가능)을 눌렀을 때 대리 신청 화면(/admin/rentals/new)을 엽니다. (관리자 화면용)
+   *
+   * 직원이 전화·방문으로 받은 주를 대신 접수하는 자리라, 공개 화면에서는
+   * 켜지 않고 늘 공개 신청서(/rental)로 보냅니다.
+   */
+  deskApply?: boolean
   /** 처음 보여 줄 검색 기간 (기본 6개월) */
   defaultUnit?: RentalUnit
 }
@@ -54,6 +61,7 @@ type RentalScheduleProps = {
 /** 전시 기간 확인 및 신청 — 기간 검색 + 대관신청 구분 + 전시장별 주간 표 */
 export default function RentalSchedule({
   linkRequests = false,
+  deskApply = false,
   defaultUnit = '6m',
 }: RentalScheduleProps) {
   const navigate = useNavigate()
@@ -119,10 +127,13 @@ export default function RentalSchedule({
     setVisible((current) => ({ ...current, [status]: !current[status] }))
   }
 
+  /** 빈 칸 — 관리자 화면에서는 대리 신청(전화·방문 접수)으로 갑니다. */
   const apply = (hallId: string, week: RentalWeek) => {
     const query = new URLSearchParams({ hall: hallId, week: week.start })
 
-    navigate(`${PATHS.rentalApply}?${query.toString()}`)
+    navigate(
+      `${deskApply ? PATHS.adminRentalDesk : PATHS.rentalApply}?${query.toString()}`,
+    )
   }
 
   /** 예약된 칸 — 관리자 화면에서는 그 신청서 수정 화면으로 갑니다. */
@@ -251,9 +262,14 @@ export default function RentalSchedule({
                           <button
                             type="button"
                             className="rental-cell rental-cell--available"
+                            title={
+                              deskApply
+                                ? '전화 · 방문으로 받은 주를 대신 접수합니다'
+                                : undefined
+                            }
                             onClick={() => apply(hall.id, week)}
                           >
-                            대관신청
+                            {deskApply ? '대리 신청' : '대관신청'}
                           </button>
                         </td>
                       )

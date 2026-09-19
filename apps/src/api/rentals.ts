@@ -265,6 +265,10 @@ export type RentalDetail = {
   }
   status: RentalStatus
   createdAt: string
+  /** 대리 신청(직원이 대신 접수)이면 true — 신청자 정보가 없습니다. */
+  desk: boolean
+  /** 대리 신청을 입력한 관리자 id (공개 신청서는 빈 문자열) */
+  createdBy: string
 }
 
 /** 대관 신청 1건 상세 (관리자) */
@@ -295,6 +299,37 @@ export function updateBooking(
     method: 'POST',
     form,
   })
+}
+
+export type RentalDeskInput = {
+  hallId: string
+  /** 그 주 수요일 (YYYY-MM-DD) */
+  weekStart: string
+  /** 전화로 들은 내용 — 관리자 확인용 메모 */
+  statement: string
+  /** 접수 상태 — 심사중(pending) / 대관완료(approved) */
+  status: RentalStatusChoice
+}
+
+/**
+ * 대리 신청 — 전화나 방문으로 잡아 둔 주를 직원이 대신 접수합니다.
+ *
+ * 신청자 정보·첨부·유의사항 동의는 보내지 않습니다. 이미 신청이 있는 주면
+ * 409(ApiError) 로 떨어지고, 화면은 일정을 새로 불러오라고 안내합니다.
+ */
+export function createDeskBooking(input: RentalDeskInput) {
+  return apiRequest<{ id: number; status: RentalStatusChoice }>(
+    '/api/rentals/desk_booking.php',
+    {
+      method: 'POST',
+      body: {
+        hall_id: input.hallId,
+        week_start: input.weekStart,
+        statement: input.statement,
+        status: input.status,
+      },
+    },
+  )
 }
 
 /**

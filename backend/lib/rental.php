@@ -693,6 +693,74 @@ function rental_create_booking(array $input, array $files)
 }
 
 /**
+ * 대리 신청 1건 저장 — 전화·방문으로 잡아 둔 주를 직원이 대신 접수합니다.
+ *
+ * 신청자에게는 묻지 않습니다. 이름·연락처·주소·전시구분·첨부·유의사항 동의는
+ * 신청자 본인이 공개 신청서에서 채울 몫이라 여기서는 비워 둡니다. 남는 것은
+ * 전시장, 그 주(week), 메모, 그리고 접수 상태(심사중 / 대관완료) 뿐입니다.
+ *
+ * wr_subject('신청자' 열)에 '대리 접수' 를 넣어 공개 신청서와 구분하고,
+ * 입력한 관리자 id 를 rt_created_by 에 남깁니다. (sql/rental_desk_columns.sql)
+ *
+ * @param string $hallId    'hall1' ~ 'hall4'
+ * @param string $weekStart 'YYYY-MM-DD' (그 주 수요일)
+ * @param string $statement 메모 — 전화로 들은 내용
+ * @param string $status    'pending' | 'approved'
+ * @param string $adminId   입력한 관리자 id
+ * @return int 생성된 wr_id
+ */
+function rental_create_desk_booking($hallId, $weekStart, $statement, $status, $adminId)
+{
+    $label = rental_hall_label($hallId);
+
+    if ($label === null) {
+        throw new InvalidArgumentException('희망 전시장을 선택해 주세요.');
+    }
+
+    $input = [
+        'hall' => $label,
+        'hall_id' => $hallId,
+        'week_start' => (string) $weekStart,
+        // 신청자가 없습니다 — 목록의 '신청자' 열에는 wr_subject 가 보입니다.
+        'name' => '관리자',
+        'title' => '대리 접수',
+        'email' => '',
+        'phone' => '',
+        'postcode' => '',
+        'address1' => '',
+        'address2' => '',
+        'kind' => '',
+        'kind_key' => '',
+        'genre' => '',
+        'genre_key' => '',
+        'genre_other' => '',
+        'memo' => rental_legacy_text((string) $statement),
+        'artist_count' => 0,
+        'work_count' => 0,
+        // 유의사항 동의는 신청자 본인의 몫이라 대리 신청에는 없습니다.
+        'terms_version' => '',
+    ];
+
+    // 요약 줄(작품 수 · 장르 · 첨부)은 값이 있는 것만 붙습니다 — 대리 신청은
+    // 메모만 남고, 관리자 목록은 이 메모에서 전시명·작가명 줄을 읽습니다.
+    $input['memo'] = rental_memo_text($input, 0);
+
+    $wrId = rental_create_booking($input, []);
+
+    // 생성 시에는 심사중(1)으로 들어가므로, 고른 상태로 다시 맞춥니다.
+    rental_set_status($wrId, $status === 'approved' ? 'approved' : 'pending');
+
+    if (rental_has_column('rt_created_by')) {
+        $stmt = db()->prepare(
+            'UPDATE ' . RENTAL_TABLE . ' SET rt_created_by = ? WHERE wr_id = ?'
+        );
+        $stmt->execute([(string) $adminId, $wrId]);
+    }
+
+    return $wrId;
+}
+
+/**
  * 첨부파일 저장 (파일 + g4_board_file 등록)
  *
  * @param PDO   $pdo
@@ -1316,6 +1384,83 @@ function rental_update_values(array $input)
 }
 
 /**
+ * euc-kr 컬럼(g4_write_order)에 넣을 수 있게 글자를 다듬습니다.
+ *
+ * 이 테이블은 euc-kr 이라, 이모지나 줄표(—)처럼 euc-kr 에 없는 글자가 하나라도
+ * 섞이면 MySQL 이 저장을 통째로 거부합니다(1366 Incorrect string value). 신청자가
+ * 전시명에 줄표를 쓰거나 이모지를 붙이는 일은 드물지 않고, 그때 화면에는
+ * "저장하지 못했습니다" 만 보입니다. 그래서 흔한 글자는 같은 뜻의 글자로 바꾸고,
+ * 그래도 남는 글자(이모지 등)는 떼어 냅니다 — 저장이 통째로 막히는 것보다 낫습니다.
+ *
+ * ⚠ 되돌릴 수 없는 값(비밀번호 등)에는 쓰지 마세요. 신청서 본문에만 씁니다.
+ *
+ * @param string $value
+ * @return string
+ */
+function rental_legacy_text($value)
+{
+    $text = (string) $value;
+
+    if ($text === '' || !function_exists('iconv')) {
+        return $text;
+    }
+
+    // 흔한 글자는 같은 뜻의 euc-kr 글자로 바꿔 살립니다.
+    $text = strtr($text, [
+        '—' => '-',
+        '–' => '-',
+        '‐' => '-',
+        '―' => '-',
+        '‘' => "'",
+        '’' => "'",
+        '“' => '"',
+        '”' => '"',
+        '…' => '...',
+        "\u{00A0}" => ' ',
+    ]);
+
+    // euc-kr 로 바꿀 수 없는 글자(이모지 등)만 떼어 냅니다.
+    //
+    // ⚠ iconv 는 '바꾼 값'을 **euc-kr 바이트**로 돌려줍니다. 그 값을 그대로 쓰면
+    //    utf8mb4 연결로 보낼 때 다시 깨지므로, 여기서는 바꿔 **보기만** 하고
+    //    돌려줄 값은 원래 UTF-8 글자에서 떼어 냅니다.
+    // ⚠ mb_check_encoding(…, 'EUC-KR') 은 엄격한 KS X 1001 이라 요즘 한글도
+    //    걸러지므로 쓰지 않습니다.
+    $safe = '';
+
+    foreach (preg_split('//u', $text, -1, PREG_SPLIT_NO_EMPTY) ?: [] as $char) {
+        if (@iconv('UTF-8', 'EUC-KR', $char) !== false) {
+            $safe .= $char;
+        }
+    }
+
+    return $safe;
+}
+
+/**
+ * 대리 신청(직원이 전화·방문으로 대신 접수) 행인지
+ *
+ * 이런 행은 신청자 정보가 없어 연락처·주소가 비어 있고, wr_subject 에
+ * '대리 접수' 가 들어 있습니다. 수정 화면이 그 사실을 알아야 신청자 정보를
+ * 비워 둔 채로도 저장할 수 있습니다.
+ *
+ * @param array $row g4_write_order 한 행
+ * @return bool
+ */
+function rental_is_desk_row(array $row)
+{
+    // 입력자(관리자 id)가 남아 있으면 대리 접수입니다. (sql/rental_desk_columns.sql)
+    if (isset($row['rt_created_by']) && trim((string) $row['rt_created_by']) !== '') {
+        return true;
+    }
+
+    // 컴럼이 생기기 전에 만든 대리 접수 행 — 신청자 자리(wr_name)가 비어 있거나
+    // '관리자' 이고, '신청자' 열(wr_subject)에 '대리 접수' 가 들어 있습니다.
+    return trim((string) $row['wr_subject']) === '대리 접수'
+        && in_array(trim((string) $row['wr_name']), ['', '관리자', '대리 접수'], true);
+}
+
+/**
  * 폴더가 비었으면 지웁니다.
  *
  * 부모 폴더(uploads/order)는 레거시 파일이 함께 있으므로 건드리지 않습니다.
@@ -1400,11 +1545,21 @@ function rental_phone_pipe($phone)
  */
 function rental_phone_from_pipe($value)
 {
-    $parts = array_filter(explode('|', (string) $value), function ($part) {
-        return $part !== '';
+    $value = trim((string) $value);
+
+    // 파이프 형식이 아니면(레거시에 드물게 있는 "010-1234-5678") 그대로 돌려줍니다.
+    if ($value === '' || strpos($value, '|') === false) {
+        return $value;
+    }
+
+    // 파이프 형식인데 숫자가 하나도 없으면(레거시의 "|||||||||") 빈 값입니다.
+    // 예전에는 이때 파이프 문자열을 그대로 돌려줘 목록의 연락처 칸에 "|||||||||"
+    // 가 보였습니다. (신청자가 없어 연락처를 비워 둔 대리 접수 건에서 두드러짐)
+    $parts = array_filter(explode('|', $value), function ($part) {
+        return trim($part) !== '';
     });
 
-    return $parts ? implode('-', $parts) : (string) $value;
+    return $parts ? implode('-', array_map('trim', $parts)) : '';
 }
 
 /**
