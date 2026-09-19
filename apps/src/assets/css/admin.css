@@ -149,11 +149,25 @@
   background: #1e3a5f;
 }
 .adm_logo a {
-  font-size: 1.6rem;
-  font-weight: 700;
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.4rem;
   color: #fff;
   text-decoration: none;
-  letter-spacing: -0.03em;
+}
+/* 공개 사이트와 같은 워드마크 (12.7:1 이라 높이만 정하면 가로는 따라옵니다) */
+.adm_logo_mark {
+  height: 1.5rem;
+  width: auto;
+  color: #fff;
+}
+/* 워드마크 아래 작은 이름표 — 관리자 화면이라는 것을 알려 줍니다 */
+.adm_logo_tag {
+  font-size: 1.1rem;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  color: rgb(255 255 255 / 0.72);
 }
 .adm_nav {
   flex: 1;

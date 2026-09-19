@@ -1,4 +1,5 @@
 import { Link, NavLink } from 'react-router-dom'
+import Wordmark from '@/components/Wordmark'
 import { ADMIN_MENU_SECTIONS, PATHS } from '@/routes/paths'
 
 type AdminSidebarProps = {
@@ -13,8 +14,16 @@ export default function AdminSidebar({ open = false, onClose }: AdminSidebarProp
   return (
     <aside className={open ? 'adm_sidebar is-open' : 'adm_sidebar'}>
       <div className="adm_logo">
-        <Link to={PATHS.adminRentals} onClick={onClose}>
-          갤러리 이즈 관리자
+        {/* 공개 사이트와 같은 워드마크 — 관리자 화면에도 같은 로고를 씁니다.
+            (크기는 admin.css 에서 정합니다: 관리자 화면은 html{font-size} 가
+             공개와 달라 Tailwind 의 rem 유틸리티가 다르게 계산됩니다) */}
+        <Link
+          to={PATHS.adminRentals}
+          onClick={onClose}
+          aria-label="갤러리 이즈 관리자 — 대관 신청으로"
+        >
+          <Wordmark className="adm_logo_mark" title="Gallery IS" />
+          <span className="adm_logo_tag">관리자</span>
         </Link>
       </div>
 
