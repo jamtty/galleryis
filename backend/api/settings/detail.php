@@ -2,7 +2,7 @@
 /**
  * GET /backend/api/settings/detail.php   (관리자 전용)
  *
- * 관리자 [환경설정] 화면이 그대로 그릴 수 있도록
+ * 관리자 [개인정보처리방침] 화면이 그대로 그릴 수 있도록
  * 그룹 · 입력칸 정의 · 현재 값을 함께 돌려줍니다.
  *
  * 응답 data: {
@@ -32,5 +32,5 @@ try {
 } catch (Throwable $e) {
     error_log('[setting detail] ' . $e->getMessage());
 
-    json_error('환경설정을 불러오지 못했습니다.', 500);
+    json_error('설정을 불러오지 못했습니다.', 500);
 }

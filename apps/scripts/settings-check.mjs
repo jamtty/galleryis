@@ -11,11 +11,12 @@
  *    (이 호스팅은 요청이 가끔 멈춰서 중간에 끝날 수 있습니다)
  *
  * 확인하는 것
- *   [1] 공개 API — 인증 없이 6개 키가 오는지 (테이블이 없어도 기본값으로 200)
+ *   [1] 공개 API — 인증 없이 설정 키가 오는지 (테이블이 없어도 기본값으로 200)
  *   [2] 로그인
  *   [3] 관리자 상세 — 그룹 · 입력칸 정의가 오는지
  *   [4] (--yes) 임시 값 저장 → 공개·관리자 양쪽 반영 확인 → 원래 값 복원
- *   [5] (--yes) 글자 수 초과 저장이 422 로 막히고 값이 그대로인지
+ *   [5] (--yes) 개인정보처리방침(HTML) — 서식 보존 · 스크립트 제거
+ *   [6] (--yes) 글자 수 초과 저장이 422 로 막히고 값이 그대로인지
  *
  * 진행 상황은 stderr 로 찍어서 중간에 멈춰도 어디까지 됐는지 보이게 합니다.
  */
@@ -29,15 +30,15 @@ const BACKUP_FILE = path.join(HERE, '..', '.settings-backup.local')
 const CONFIRM = process.argv.includes('--yes')
 const RESTORE = process.argv.includes('--restore')
 
-/** 저장/복원 점검에 쓸 설정 키 */
-const TEST_KEY = 'page_notices_lede'
-const TEST_VALUE = '[검증] 잠시 넣은 문구입니다.'
-
-/** 개인정보처리방침(HTML) 점검용 */
+/** 개인정보처리방침(HTML) — 저장/복원 점검에도 같은 키를 씁니다. */
 const HTML_KEY = 'page_privacy_html'
 const HTML_VALUE = '<h2>1. 수집하는 항목</h2><p>이름 · 연락처</p><script>alert(1)</script>'
 
-const OVER_LIMIT = '가'.repeat(201)
+/** [4] 저장/복원 왕복에 쓸 임시 값 */
+const TEST_VALUE = '[검증] 잠시 넣은 문구입니다.'
+
+/** 글자 수 상한(50000자)을 넘기는 값 */
+const OVER_LIMIT = '가'.repeat(50001)
 
 function loadEnv(file) {
   const map = {}
@@ -152,15 +153,8 @@ function valuesFromGroups(data) {
   return map
 }
 
-/** 정의에 있어야 하는 키 — 사이트 상단 메뉴 순서와 같습니다. */
-const REQUIRED_KEYS = [
-  'page_exhibitions_lede',
-  'page_about_lede',
-  'page_halls_lede',
-  'page_rental_lede',
-  'page_notices_lede',
-  'page_privacy_html',
-]
+/** 정의에 있어야 하는 키 — 현재는 개인정보처리방침 한 가지입니다. */
+const REQUIRED_KEYS = ['page_privacy_html']
 
 async function main() {
   console.log(`대상: ${BASE}\n`)
@@ -234,7 +228,7 @@ async function main() {
   check(detail.status === 200, '관리자 상세 응답 200', `status=${detail.status} ${detail.message ?? ''}`)
   check(groups.length > 0, '그룹이 1개 이상', `${groups.length}개`)
   check(fieldCount === REQUIRED_KEYS.length, `입력칸 ${REQUIRED_KEYS.length}개`, `${fieldCount}개`)
-  check(order.join(',') === REQUIRED_KEYS.join(','), '화면 순서가 상단 메뉴 순서와 같음', order.join(', '))
+  check(order.join(',') === REQUIRED_KEYS.join(','), '정의된 순서와 같음', order.join(', '))
 
   const typed = groups.flatMap((group) => group.fields ?? []).every((field) => Boolean(field.type))
 
@@ -258,34 +252,34 @@ async function main() {
   console.log(`\n  [i]   현재 값을 백업했습니다: ${path.relative(path.join(HERE, '..'), BACKUP_FILE)}`)
   console.log('  [i]   문제가 생기면 `node scripts/settings-check.mjs --restore` 로 되돌릴 수 있습니다.\n')
 
-  const before = values[TEST_KEY] ?? ''
+  const before = values[HTML_KEY] ?? ''
 
   const save = await request('/api/settings/update.php', {
     method: 'POST',
     token,
-    json: { values: { [TEST_KEY]: TEST_VALUE } },
+    json: { values: { [HTML_KEY]: TEST_VALUE } },
   })
 
   check(save.status === 200 && save.data?.saved === 1, '저장 성공', `saved=${save.data?.saved}`)
 
   const afterDetail = valuesFromGroups((await request('/api/settings/detail.php', { token })).data)
 
-  check(afterDetail[TEST_KEY] === TEST_VALUE, '관리자 상세에 새 값이 반영됨', afterDetail[TEST_KEY])
+  check(afterDetail[HTML_KEY] === TEST_VALUE, '관리자 상세에 새 값이 반영됨', afterDetail[HTML_KEY])
 
   const afterPublic = await request('/api/settings/public.php')
 
-  check(afterPublic.data?.[TEST_KEY] === TEST_VALUE, '공개 API 에도 새 값이 반영됨', afterPublic.data?.[TEST_KEY])
+  check(afterPublic.data?.[HTML_KEY] === TEST_VALUE, '공개 API 에도 새 값이 반영됨', afterPublic.data?.[HTML_KEY])
 
   const restore = await request('/api/settings/update.php', {
     method: 'POST',
     token,
-    json: { values: { [TEST_KEY]: before } },
+    json: { values: { [HTML_KEY]: before } },
   })
 
   const restored = valuesFromGroups((await request('/api/settings/detail.php', { token })).data)
 
   check(restore.status === 200, '원래 값으로 되돌리기 성공')
-  check(restored[TEST_KEY] === before, '원래 값 그대로 복원됨', JSON.stringify(restored[TEST_KEY]))
+  check(restored[HTML_KEY] === before, '원래 값 그대로 복원됨', JSON.stringify(restored[HTML_KEY]))
 
   step('\n[5] 개인정보처리방침(HTML) — 서식 보존 · 스크립트 제거')
 
@@ -327,14 +321,14 @@ async function main() {
   const over = await request('/api/settings/update.php', {
     method: 'POST',
     token,
-    json: { values: { [TEST_KEY]: OVER_LIMIT } },
+    json: { values: { [HTML_KEY]: OVER_LIMIT } },
   })
 
-  check(over.status === 422, '201자 저장은 422 로 막힘', `status=${over.status} ${over.message ?? ''}`)
+  check(over.status === 422, '50001자 저장은 422 로 막힘', `status=${over.status} ${over.message ?? ''}`)
 
   const untouched = valuesFromGroups((await request('/api/settings/detail.php', { token })).data)
 
-  check(untouched[TEST_KEY] === before, '막힌 요청은 값을 바꾸지 않음')
+  check(untouched[HTML_KEY] === before, '막힌 요청은 값을 바꾸지 않음')
 
   console.log(`\n${failures === 0 ? '[OK] 환경설정 점검 통과' : `[FAIL] 실패 ${failures}건`}`)
 

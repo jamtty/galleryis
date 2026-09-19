@@ -2,7 +2,7 @@
 /**
  * POST /backend/api/settings/update.php   (관리자 전용, JSON)
  *
- *   { "values": { "page_notices_lede": "...", ... } }
+ *   { "values": { "page_privacy_html": "..." } }
  *
  * 정의(backend/lib/setting.php)에 있는 키만 저장하고, 모르는 키는 무시합니다.
  * 글자 수 제한을 넘거나 필수값이 비어 있으면 422 를 돌려줍니다.

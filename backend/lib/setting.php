@@ -45,7 +45,7 @@ const SETTING_KEY_PATTERN = '/^[a-z][a-z0-9_]{1,59}$/';
  *     help   : 그룹 설명 (선택)
  *     fields : 설정 키 => [
  *       label    : 입력칸 제목
- *       type     : text | textarea           (종류가 필요해지면 여기를 늘립니다)
+ *       type     : text | textarea | html    (종류가 필요해지면 여기를 늘립니다)
  *       default  : 값이 없을 때 쓸 기본값
  *       max      : 최대 글자 수 (선택 — 없으면 SETTING_VALUE_MAX)
  *       hint     : 입력칸 아래 도움말 (선택)
@@ -59,53 +59,6 @@ const SETTING_KEY_PATTERN = '/^[a-z][a-z0-9_]{1,59}$/';
 function setting_definitions()
 {
     return [
-        'page_lede' => [
-            'label' => '페이지 안내문구',
-            'help' => '각 페이지 제목(서브 타이틀) 바로 아래에 나오는 문구입니다. 비워 두면 표시되지 않습니다.',
-            // 순서는 사이트 상단 메뉴와 같게 맞춥니다. (전시 · 갤러리 이즈 · 전시장 · 대관 · 소식)
-            'fields' => [
-                'page_exhibitions_lede' => [
-                    'label' => '전시',
-                    'type' => 'textarea',
-                    'default' => '',
-                    'max' => 200,
-                    'hint' => '/exhibitions — 목록 상단 탭 위',
-                    'public' => true,
-                ],
-                'page_about_lede' => [
-                    'label' => '갤러리 이즈',
-                    'type' => 'textarea',
-                    'default' => '',
-                    'max' => 200,
-                    'hint' => '/about — 제목 아래 (원본은 비어 있고, 소개 문구는 본문 인트로 제목으로 들어감)',
-                    'public' => true,
-                ],
-                'page_halls_lede' => [
-                    'label' => '전시장',
-                    'type' => 'textarea',
-                    'default' => '하나의 건축물 안에 네 개의 독립적인 전시실',
-                    'max' => 200,
-                    'hint' => '/halls — 제목 아래',
-                    'public' => true,
-                ],
-                'page_rental_lede' => [
-                    'label' => '대관',
-                    'type' => 'textarea',
-                    'default' => '',
-                    'max' => 200,
-                    'hint' => '/rental — 안내 01~04 위',
-                    'public' => true,
-                ],
-                'page_notices_lede' => [
-                    'label' => '소식',
-                    'type' => 'textarea',
-                    'default' => '',
-                    'max' => 200,
-                    'hint' => '/notices — 목록 위',
-                    'public' => true,
-                ],
-            ],
-        ],
         'page_content' => [
             'label' => '개인정보처리방침',
             'help' => '개인정보처리방침 페이지(/privacy)의 내용입니다. 에디터로 제목·목록 같은 서식을 넣을 수 있습니다.',

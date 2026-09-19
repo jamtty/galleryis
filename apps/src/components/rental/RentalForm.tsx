@@ -10,6 +10,8 @@ import {
   updateBooking,
   type RentalAttachment,
 } from '@/api/rentals'
+import ImageLightbox from '@/components/admin/ImageLightbox'
+import { packRentalMemo, unpackRentalMemo } from '@/lib/rentalMemo'
 import { formatDotRange } from '@/utils/date'
 
 /** 관리자 수정 모드에서 미리 채울 값 */
@@ -220,7 +222,14 @@ export default function RentalForm({
 
   const [artistCount, setArtistCount] = useState(initial?.artistCount ?? '')
   const [workCount, setWorkCount] = useState(initial?.workCount ?? '')
-  const [memo, setMemo] = useState(initial?.memo ?? '')
+
+  // 전시명·작가명은 공개 신청 폼과 같이 메모(wr_3)에 담아 둡니다.
+  // (저장된 신청서를 열면 그 메모에서 다시 꺼내 옵니다 — src/lib/rentalMemo.ts)
+  const [memoFields] = useState(() => unpackRentalMemo(initial?.memo))
+  const [exhibitionTitle, setExhibitionTitle] = useState(memoFields.title)
+  const [exhibitionArtist, setExhibitionArtist] = useState(memoFields.artist)
+  /** 옛 신청서에 남아 있던 메모 — 있을 때만 보여 주고 지우지 않습니다 */
+  const [memoRest, setMemoRest] = useState(memoFields.rest)
 
   const [bio, setBio] = useState<File[]>([])
   const [portfolio, setPortfolio] = useState<File[]>([])
@@ -241,6 +250,8 @@ export default function RentalForm({
   const [dragging, setDragging] = useState(false)
   const [addressOpening, setAddressOpening] = useState(false)
   const [addressFailed, setAddressFailed] = useState(false)
+  /** 포트폴리오 팝업 슬라이드에 열려 있는 이미지 번호 (null 이면 닫힘) */
+  const [lightbox, setLightbox] = useState<number | null>(null)
 
   const address2Ref = useRef<HTMLInputElement>(null)
   const phone3Ref = useRef<HTMLInputElement>(null)
@@ -256,6 +267,24 @@ export default function RentalForm({
       previews.forEach((item) => URL.revokeObjectURL(item.url))
     },
     [previews],
+  )
+
+  /** 저장된 포트폴리오 중 실제로 볼 수 있는 것 (예전 자료가 없으면 url 이 빕니다) */
+  const savedPortfolioImages = useMemo(
+    () => savedPortfolio.filter((file) => file.url !== ''),
+    [savedPortfolio],
+  )
+
+  /** 팝업 슬라이드에 보여 줄 이미지 — 저장된 것 먼저, 새로 고른 것 다음 */
+  const lightboxImages = useMemo(
+    () => [
+      ...savedPortfolioImages.map((file) => ({
+        url: file.url,
+        name: file.name,
+      })),
+      ...previews.map((item) => ({ url: item.url, name: item.file.name })),
+    ],
+    [savedPortfolioImages, previews],
   )
 
   const hallLabel =
@@ -556,7 +585,12 @@ export default function RentalForm({
         work_count: Number(workCount),
         genre,
         genre_other: genre === 'other' ? genreOther : undefined,
-        memo,
+        // 공개 신청 폼과 같은 모양(`전시명 : …` / `작가명 : …`)으로 담습니다.
+        memo: packRentalMemo({
+          title: exhibitionTitle,
+          artist: exhibitionArtist,
+          rest: memoRest,
+        }),
       },
       terms_version: TERMS_VERSION,
     }
@@ -896,6 +930,39 @@ export default function RentalForm({
             </span>
           </div>
 
+          {/* 전시명·작가명 — 전시구분 위 */}
+          <label className="rental-row" htmlFor="rq-title">
+            <span className="rental-row__label">
+              <i className="rental-dot" aria-hidden="true" />
+              전시명
+            </span>
+            <span className="rental-row__field">
+              <input
+                id="rq-title"
+                type="text"
+                maxLength={120}
+                value={exhibitionTitle}
+                onChange={(e) => setExhibitionTitle(e.target.value)}
+              />
+            </span>
+          </label>
+
+          <label className="rental-row" htmlFor="rq-artist">
+            <span className="rental-row__label">
+              <i className="rental-dot" aria-hidden="true" />
+              작가명
+            </span>
+            <span className="rental-row__field">
+              <input
+                id="rq-artist"
+                type="text"
+                maxLength={120}
+                value={exhibitionArtist}
+                onChange={(e) => setExhibitionArtist(e.target.value)}
+              />
+            </span>
+          </label>
+
           <div className="rental-row">
             <span className="rental-row__label" id="lbl-kind">
               <i className="rental-dot" aria-hidden="true" />
@@ -1041,7 +1108,20 @@ export default function RentalForm({
                       key={`saved-${file.no}`}
                     >
                       {file.url ? (
-                        <img src={file.url} alt={file.name} />
+                        <button
+                          type="button"
+                          className="rental-dropzone__view"
+                          aria-label={`${file.name} 크게 보기`}
+                          onClick={() =>
+                            setLightbox(
+                              savedPortfolioImages.findIndex(
+                                (item) => item.no === file.no,
+                              ),
+                            )
+                          }
+                        >
+                          <img src={file.url} alt={file.name} />
+                        </button>
                       ) : (
                         <span className="rental-dropzone__missing">
                           파일 없음
@@ -1063,7 +1143,16 @@ export default function RentalForm({
                       className="rental-dropzone__item"
                       key={`${item.file.name}-${index}`}
                     >
-                      <img src={item.url} alt={item.file.name} />
+                      <button
+                        type="button"
+                        className="rental-dropzone__view"
+                        aria-label={`${item.file.name} 크게 보기`}
+                        onClick={() =>
+                          setLightbox(savedPortfolioImages.length + index)
+                        }
+                      >
+                        <img src={item.url} alt={item.file.name} />
+                      </button>
                       <button
                         type="button"
                         className="rental-dropzone__remove"
@@ -1107,19 +1196,22 @@ export default function RentalForm({
             </div>
           </div>
 
-          <label className="rental-row" htmlFor="rq-memo">
-            <span className="rental-row__label">
-              <i className="rental-dot" aria-hidden="true" />
-              메모
-            </span>
-            <span className="rental-row__field">
-              <textarea
-                id="rq-memo"
-                value={memo}
-                onChange={(e) => setMemo(e.target.value)}
-              />
-            </span>
-          </label>
+          {/* 예전 신청서에 사람이 적어 둔 메모 — 있으면 그대로 보여 줍니다 */}
+          {memoRest !== '' && (
+            <label className="rental-row" htmlFor="rq-memo">
+              <span className="rental-row__label">
+                <i className="rental-dot" aria-hidden="true" />
+                메모
+              </span>
+              <span className="rental-row__field">
+                <textarea
+                  id="rq-memo"
+                  value={memoRest}
+                  onChange={(e) => setMemoRest(e.target.value)}
+                />
+              </span>
+            </label>
+          )}
         </div>
       </div>
 
@@ -1206,6 +1298,14 @@ export default function RentalForm({
           {sending ? '저장 중...' : editing ? '수정' : '확인'}
         </button>
       </div>
+
+      {/* 포트폴리오 썸네일을 누르면 크게 보는 팝업 슬라이드 (작품등록과 같은 컴포넌트) */}
+      <ImageLightbox
+        images={lightboxImages}
+        index={lightbox}
+        onClose={() => setLightbox(null)}
+        onIndexChange={setLightbox}
+      />
     </form>
   )
 }

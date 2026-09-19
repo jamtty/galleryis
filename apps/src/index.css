@@ -1,0 +1,311 @@
+@import "tailwindcss";
+
+/* Gallery IS v4, "인사아트센터". 2026-08-25: the gallery named 인사아트센터 as
+   the direction (docs/STATUS_REPORT_2026-08-16.md §2), and this block is
+   tuned to what insaartcenter.com actually renders: a true-white ground,
+   neutral hairlines, one dark ink, Noto Sans KR for the words, 700 for every
+   heading, and no second colour anywhere on the page. The ink is the single
+   value the gallery overrode: rgb 51 51 51 since 2026-08-29, in place of the
+   rgb 24 23 22 sampled off insaartcenter. The persimmon survives only as
+   `accent-ink`, for error and status text and the demo badge, never as a
+   hover. Since 2026-08-27 the numerals are Pretendard, at the gallery's
+   request; see the @font-face block after @theme.
+
+   Mirrored verbatim in apps/studio; keep the two in step. The desk keeps its
+   own token names but takes its light from this palette since 2026-08-25. */
+@theme {
+  /* ---- Ground ------------------------------------------------------- */
+  --color-ground: #ffffff;
+  --color-surface: #ffffff;
+  /* The grey panel: the hero's poster field, 관람안내's text half, a table's
+     label cells. insaartcenter's own #f5f5f5. */
+  --color-surface-hi: #f5f5f5;
+  /* The warm panel: 갤러리 소개's introduction beside the watercolour, at the
+     gallery's own rgb 250 246 242 (2026-08-29). Warmer than surface-hi so
+     the text half sits with the painting's paper rather than against it. */
+  --color-surface-warm: #faf6f2;
+
+  /* Decorative hairlines, table rules, dividers. */
+  --color-line: #e3e3e3;
+  /* Borders of *interactive* controls: 3.5:1 on white, the non-text minimum
+     is 3:1. Chips, cells and the outline pill's resting border. */
+  --color-line-lit: #8a8a8a;
+
+  /* ---- Ink ---------------------------------------------------------- */
+  /* The gallery's own, rgb 51 51 51, since 2026-08-29: a softer black than
+     the #181716 sampled off insaartcenter that it replaces. 12.6:1 on white,
+     and — the footer being `bg-ink` — the footer's ground as well. */
+  --color-ink: #333333;
+  /* Muted text that still clears AA: 5.5:1 on white, 5.0:1 on surface-hi.
+     Dates, halls, notes. Never fake muted text with opacity on ink. */
+  --color-ink-soft: #666666;
+  /* Its mirror for the dark footer, lightened with the ink on 2026-08-29:
+     the old #9a9a9a was 5.6:1 on #181716 but only 4.5:1 on #333333, and the
+     footer sets its address and copyright at text-sm. This one is 5.0:1. */
+  --color-ground-soft: #a3a3a3;
+
+  /* ---- The one colour ----------------------------------------------- */
+  /* Fills only, and now unused on the page: kept so a `bg-accent` that
+     sneaks in still resolves to the brand orange rather than to nothing. */
+  --color-accent: #f26522;
+  /* The readable persimmon: 5.6:1 on white. Error and status text, the demo
+     badge. Not links, not hover, not focus: the page is monochrome. */
+  --color-accent-ink: #b23c0e;
+
+  /* ---- Type --------------------------------------------------------- */
+  /* One family for the words, insaartcenter's Noto Sans KR; the Space Mono
+     metadata voice is retired with v4. `Pretendard` in front of it is the
+     numerals face declared below: a digit and the marks inside a number
+     resolve there, every letter falls through to Noto. */
+  --font-sans:
+    "Pretendard", "Noto Sans KR", ui-sans-serif, system-ui, sans-serif;
+  --font-display:
+    "Pretendard", "Noto Sans KR", ui-sans-serif, system-ui, sans-serif;
+
+  /* 17px body, insaartcenter's own reading size, and the older audience's. */
+  --text-base: 1.0625rem;
+  --text-base--line-height: 1.65;
+
+  /* The hero's show title: 64px bold on a desktop, 36px on a phone. */
+  --text-display: clamp(2.25rem, 5vw, 4rem);
+  --text-display--line-height: 1.15;
+  --text-display--letter-spacing: -0.02em;
+
+  /* A page's centred title (전시 · 대관 · 소개), set light, not bold — the h1
+     at the top of every menu. Brought down a step on 2026-08-29 at the
+     gallery's request: 36px on a desktop and 26px on a phone, where it was
+     44 and 30. */
+  --text-headline: clamp(1.625rem, 2.8vw, 2.25rem);
+  --text-headline--line-height: 1.2;
+  --text-headline--letter-spacing: -0.01em;
+
+  /* Every other heading on the page: a section's title on its rule (현재 전시,
+     전시 개요, 약력, 관람 안내, 오시는 길) and a detail page's h1. Down with
+     the headline on 2026-08-29: 24px on a desktop and 20px on a phone, where
+     it was 28 and 24. */
+  --text-title: clamp(1.25rem, 1.9vw, 1.5rem);
+  --text-title--line-height: 1.25;
+  --text-title--letter-spacing: -0.01em;
+
+  --animate-rise: rise 0.7s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+/* The numerals: Pretendard, and only what a number is made of. `unicode-range`
+   narrows the face to the ten digits and the marks that sit between them — the
+   comma of ₩ 5,500,000, the dots of 2026.08.05, the tilde of a week's range,
+   the hyphens of 02-736-6669, the colon of 10:00, the + of +82, the % of 30%,
+   and the ₩ itself. Every letter, Hangul or Latin, still falls through to Noto
+   Sans KR. The range was the digits alone until 2026-08-29, which left a Noto
+   comma — heavier and rounder — between Pretendard figures in every price; these
+   marks turn Pretendard in prose too, and beside Hangul that goes unnoticed
+   where a mismatched thousands separator did not. U+002F (/) and · are left
+   out on purpose: on these sites they divide words, not figures. Keep this list
+   in step with MARKS in scripts/make_number_font.py.
+
+   The files are that subset alone, ~2.4 KB a weight, cut by that script and
+   inlined by the build (they sit under Vite's 4 KB limit, so no fetch); `tnum`
+   survives the cut so `tabular-nums` still lines a column of dates up. Three
+   weights, the same three Noto is fetched at. A family name under @font-face
+   shadows any installed font of that name, so a visitor with Pretendard on
+   their machine sees the same page as everyone else. */
+@font-face {
+  font-family: "Pretendard";
+  font-weight: 400;
+  font-display: swap;
+  unicode-range: U+0025, U+002B-002E, U+0030-0039, U+003A, U+007E, U+20A9;
+  src: url("./fonts/pretendard-digits-400.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "Pretendard";
+  font-weight: 500;
+  font-display: swap;
+  unicode-range: U+0025, U+002B-002E, U+0030-0039, U+003A, U+007E, U+20A9;
+  src: url("./fonts/pretendard-digits-500.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "Pretendard";
+  font-weight: 700;
+  font-display: swap;
+  unicode-range: U+0025, U+002B-002E, U+0030-0039, U+003A, U+007E, U+20A9;
+  src: url("./fonts/pretendard-digits-700.woff2") format("woff2");
+}
+
+body {
+  background-color: var(--color-ground);
+  color: var(--color-ink);
+  /* Hangul on white at 17px wants a little more hinting than the default;
+     insaartcenter renders with it too. */
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Monochrome page, monochrome ring. Ink on white is 12.6:1; the 2px offset
+   keeps it off the control's own border. */
+:focus-visible {
+  outline: 2px solid var(--color-ink);
+  outline-offset: 2px;
+}
+
+::selection {
+  background-color: var(--color-ink);
+  color: var(--color-ground);
+}
+
+/* The desk's rich text, as the API sanitised it (see components/RichText):
+   paragraphs, the four inline marks, links, a paragraph's alignment. The
+   desk's editor wears the same block, so what the gallery types is what the
+   visitor reads. A paragraph per line and no margin between them, because a
+   약력 is typed one entry per Enter; a blank line is an empty paragraph, kept
+   one line tall so it stays a blank line rather than collapsing to nothing. */
+.rich {
+  font-size: 1rem;
+  line-height: 1.625;
+  overflow-wrap: anywhere;
+}
+.rich p:empty::before {
+  content: "\00a0";
+}
+.rich a {
+  text-decoration: underline;
+  text-decoration-color: var(--color-line-lit);
+  text-underline-offset: 4px;
+}
+.rich a:hover {
+  text-decoration-color: var(--color-ink);
+}
+
+/* Loading, two ways, per the usual guidance (skeletons for content whose
+   layout is known, an activity mark for a blocking wait):
+
+   `.skeleton` is a content-shaped placeholder in the grey field with one
+   light sweep across it. The sweep lives on a pseudo-element and moves with
+   a transform, so it composites on the GPU and never re-lays the page out.
+   Shapes are decorative (`aria-hidden`); the wrapper carries role="status"
+   and the words for a screen reader. Under prefers-reduced-motion the global
+   rule below freezes the sweep and the placeholder is simply a still grey
+   shape, which is the correct fallback. */
+.skeleton {
+  position: relative;
+  overflow: hidden;
+  background-color: var(--color-surface-hi);
+}
+
+.skeleton::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  transform: translateX(-100%);
+  background-image: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.75) 50%,
+    transparent 100%
+  );
+  animation: shimmer 1.6s ease-in-out infinite;
+  will-change: transform;
+}
+
+@keyframes shimmer {
+  to {
+    transform: translateX(100%);
+  }
+}
+
+/* The activity mark for a blocking wait (the studio opening a hall, a route
+   chunk arriving): the gallery's own mark breathing over a hairline with one
+   ink segment sliding along it. */
+@keyframes breathe {
+  0%,
+  100% {
+    opacity: 0.3;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+@keyframes slide {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(300%);
+  }
+}
+
+.animate-breathe {
+  animation: breathe 1.8s ease-in-out infinite;
+}
+
+/* The picture popup arriving: the white comes up over the page in the
+   0.3s galleryhyundai.com's own viewer takes. */
+@keyframes fade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.animate-fade {
+  animation: fade 0.3s ease both;
+}
+
+.animate-slide {
+  animation: slide 1.4s cubic-bezier(0.65, 0, 0.35, 1) infinite;
+}
+
+/* The hall canvas owns every touch that lands on it. Without this a phone
+   claims a look- or orbit-drag as a page pan: the gesture dies on a
+   pointercancel after the first move, so the view barely turns.
+   !important is load-bearing, three-stdlib's OrbitControls writes
+   `touch-action: auto` inline on the canvas in its teardown, and leaving the
+   dollhouse for the first-person walk is exactly what unmounts it. An author
+   !important beats that inline declaration; nothing else would. */
+.hall-canvas canvas {
+  touch-action: none !important;
+  user-select: none;
+  -webkit-touch-callout: none;
+}
+
+/* Pull-to-refresh on a phone would fire mid-drag in the hall; it is scoped to
+   the pages that actually have a canvas rather than to the whole site. */
+body:has(.hall-canvas) {
+  overscroll-behavior: none;
+}
+
+/* Scroll-linked reveal, with no JavaScript and no IntersectionObserver.
+   Where `animation-timeline` is unsupported (Safari, Firefox today) the
+   selector simply never applies and the content is plainly visible, which is
+   the correct fallback, not a degraded one. */
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    .reveal {
+      animation: rise linear both;
+      animation-timeline: view();
+      animation-range: entry 0% entry 55%;
+    }
+  }
+}
+
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation: none !important;
+    transition: none !important;
+  }
+}

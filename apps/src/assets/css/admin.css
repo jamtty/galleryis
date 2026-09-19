@@ -755,12 +755,265 @@ select.adm_btn_secondary {
   max-width: none;
   margin: 0;
 }
-/* 관리자 — 대관 일정: 공개 페이지의 표(.rental-schedule)를 그대로 씁니다. */
+/* ==========================================================================
+   관리자 — 대관 일정 (공개 페이지 "전시 기간 확인 및 신청" 표와 같은 모양)
+
+   공개 화면은 Tailwind 로 그리지만 관리자 화면은 Tailwind 를 쓸 수 없습니다
+   (html{font-size} 가 10px/9px/12px 로 바뀌어 rem 유틸리티·브레이크포인트가
+    공개와 다르게 계산됩니다). 그래서 공개 표의 **모양**(가는 선 · 흰 칸 ·
+    상태별 테두리/채움 · ink 로 반전되는 hover)을 그대로 옮겨 적었습니다.
+   칸 이름은 이 화면이 쓰던 .rental-* 을 그대로 씁니다.
+   ========================================================================== */
 .adm_schedule {
   padding: 0 2rem 2rem;
 }
 .adm_main .rental-schedule {
   margin-top: 0;
+}
+
+/* 전시기간 검색 · 대관신청 구분 ------------------------------------------ */
+.rental-filter {
+  margin-bottom: 2rem;
+  border-top: 1px solid var(--color-line);
+}
+.rental-filter__row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 1.2rem;
+  padding: 1.4rem 0;
+  border-bottom: 1px solid var(--color-line);
+}
+.rental-filter__label {
+  flex-shrink: 0;
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: var(--color-ink);
+}
+.rental-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+}
+/* 구분 줄은 공개 페이지 범례와 같이 항목 사이를 넉넉히 (gap-x-5 = 20px) */
+.rental-chips:has(.rental-chip--approved) {
+  column-gap: 2rem;
+}
+.rental-chip {
+  min-height: 3.4rem;
+  padding: 0 1.6rem;
+  border: 1px solid var(--color-line-lit);
+  border-radius: 999px;
+  background: var(--color-surface);
+  color: var(--color-ink-soft);
+  font-family: inherit;
+  font-size: 1.3rem;
+  font-weight: 500;
+  transition: border-color 0.15s, background-color 0.15s, color 0.15s;
+}
+.rental-chip:hover {
+  border-color: var(--color-ink);
+  color: var(--color-ink);
+}
+.rental-chip--period.is-on {
+  border-color: var(--color-ink);
+  background: var(--color-ink);
+  color: var(--color-ground);
+  font-weight: 700;
+}
+
+/* 대관신청 구분 — 공개 페이지 표의 범례와 **같은 모양** (네모 + 글자).
+   공개는 범례(읽기만)지만 관리자에서는 켜고 끄는 버튼이라,
+   꺼진 구분은 흐리게 두고 누르면 다시 돌아옵니다. */
+.rental-chip--available,
+.rental-chip--pending,
+.rental-chip--approved {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.8rem;
+  min-height: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: none;
+  color: var(--color-ink-soft);
+  font-size: 1.4rem;
+  font-weight: 400;
+}
+.rental-chip--available::before,
+.rental-chip--pending::before,
+.rental-chip--approved::before {
+  content: '';
+  display: block;
+  flex-shrink: 0;
+  width: 1.2rem;
+  height: 1.2rem;
+  border: 1px solid var(--color-line-lit);
+  border-radius: 0.2rem;
+  background: var(--color-surface);
+}
+.rental-chip--pending::before {
+  border-style: dashed;
+  border-color: rgb(102 102 102 / 0.5);
+  background: var(--color-ground);
+}
+.rental-chip--approved::before {
+  background: rgb(51 51 51 / 0.3);
+}
+.rental-chip--available:hover,
+.rental-chip--pending:hover,
+.rental-chip--approved:hover {
+  border: 0;
+  color: var(--color-ink);
+  text-decoration: underline;
+  text-underline-offset: 0.3rem;
+}
+.rental-chip--available:not(.is-on),
+.rental-chip--pending:not(.is-on),
+.rental-chip--approved:not(.is-on) {
+  color: var(--color-ground-soft);
+}
+.rental-chip--available:not(.is-on)::before,
+.rental-chip--pending:not(.is-on)::before,
+.rental-chip--approved:not(.is-on)::before {
+  opacity: 0.35;
+}
+.rental-filter__note {
+  font-size: 1.2rem;
+  color: var(--color-ink-soft);
+}
+.rental-filter__range {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  font-size: 1.4rem;
+  color: var(--color-ink);
+  font-variant-numeric: tabular-nums;
+}
+.rental-filter__tilde {
+  color: var(--color-ink-soft);
+}
+
+/* 표 ------------------------------------------------------------------- */
+.rental-hint {
+  margin-top: 1.6rem;
+  font-size: 1.3rem;
+  color: var(--color-ink-soft);
+}
+.rental-error {
+  margin-top: 1.6rem;
+  font-size: 1.3rem;
+  color: var(--color-accent-ink);
+}
+.rental-table-wrap {
+  overflow-x: auto;
+}
+.rental-table {
+  /* sticky 열이 움직여도 선이 따라오도록 collapse 가 아니라 separate 입니다. */
+  width: 100%;
+  min-width: 46rem;
+  border-collapse: separate;
+  border-spacing: 0;
+  font-size: 1.3rem;
+}
+.rental-table thead th {
+  padding: 1.2rem 0.6rem;
+  border-top: 1px solid var(--color-line);
+  border-bottom: 1px solid var(--color-line);
+  background: var(--color-ground);
+  color: var(--color-ink);
+  font-size: 1.3rem;
+  font-weight: 700;
+  text-align: center;
+  white-space: nowrap;
+}
+.rental-table__corner,
+.rental-table__week {
+  position: sticky;
+  left: 0;
+  z-index: 10;
+  background: var(--color-ground);
+  text-align: left;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+.rental-table thead .rental-table__corner {
+  padding-left: 0;
+  /* .rental-table thead th 의 가운데 정렬을 되돌립니다 (특정성 때문에 여기서) */
+  text-align: left;
+  font-weight: 700;
+}
+.rental-table__week {
+  padding: 0.9rem 1.6rem 0.9rem 0;
+  border-bottom: 1px solid var(--color-line);
+  font-size: 1.2rem;
+  font-weight: 400;
+  color: var(--color-ink-soft);
+}
+.rental-table tbody td {
+  padding: 0.5rem 0.6rem;
+  border-bottom: 1px solid var(--color-line);
+  text-align: center;
+}
+
+/* 상태 칸 — 신청가능은 "대관신청" 버튼, 나머지는 테두리와 채움으로 구분 ---- */
+.rental-cell {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  min-height: 4.4rem;
+  padding: 0.6rem 0.8rem;
+  border: 1px solid transparent;
+  border-radius: 0.2rem;
+  background: none;
+  font-family: inherit;
+  font-size: 1.3rem;
+  line-height: 1.3;
+  text-align: center;
+  transition: border-color 0.15s, background-color 0.15s, color 0.15s;
+}
+.rental-cell--available {
+  border-style: solid;
+  border-color: var(--color-line-lit);
+  background: var(--color-surface);
+  color: var(--color-ink);
+  cursor: pointer;
+}
+.rental-cell--available:hover {
+  border-color: var(--color-ink);
+  background: var(--color-ink);
+  color: var(--color-ground);
+}
+.rental-cell--pending {
+  border-style: dashed;
+  border-color: rgb(102 102 102 / 0.5);
+  background: var(--color-ground);
+  color: var(--color-ink-soft);
+}
+.rental-cell--approved {
+  border-style: double;
+  border-color: var(--color-line-lit);
+  background: rgb(51 51 51 / 0.3);
+  color: var(--color-ink);
+}
+/* 관리자 — 예약된 칸을 누르면 그 신청서로 갑니다. */
+.rental-cell--link {
+  gap: 0.4rem;
+  cursor: pointer;
+}
+.rental-cell--link:hover {
+  border-color: var(--color-ink);
+}
+.rental-cell__mark {
+  font-size: 1.1rem;
+  color: var(--color-ink-soft);
+}
+/* 구분 필터에서 제외된 칸 — 자리만 지키고 아무것도 그리지 않습니다. */
+.rental-cell.is-off {
+  border-color: transparent;
+  background: none;
 }
 .adm_td_center {
   text-align: center !important;

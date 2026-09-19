@@ -12,11 +12,6 @@ import { apiRequest } from './client'
 
 /** 공개 사이트에서 쓰는 설정 키 (설정 키 → 화면에서 쓰는 이름) */
 export const SETTING_KEYS = {
-  pageExhibitionsLede: 'page_exhibitions_lede',
-  pageAboutLede: 'page_about_lede',
-  pageHallsLede: 'page_halls_lede',
-  pageRentalLede: 'page_rental_lede',
-  pageNoticesLede: 'page_notices_lede',
   pagePrivacyHtml: 'page_privacy_html',
 } as const
 
@@ -27,11 +22,6 @@ export type SiteSettings = Record<keyof typeof SETTING_KEYS, string>
  * (backend/lib/setting.php 의 default 와 같게 유지하세요)
  */
 export const DEFAULT_SETTINGS: SiteSettings = {
-  pageExhibitionsLede: '',
-  pageAboutLede: '',
-  pageHallsLede: '하나의 건축물 안에 네 개의 독립적인 전시실',
-  pageRentalLede: '',
-  pageNoticesLede: '',
   pagePrivacyHtml: '',
 }
 

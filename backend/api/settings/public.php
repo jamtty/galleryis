@@ -5,7 +5,7 @@
  * 공개 화면에서 쓰는 설정값만 돌려줍니다. (정의에서 'public' => true 인 키)
  * 테이블이 아직 없어도 기본값을 돌려주므로 공개 화면이 깨지지 않습니다.
  *
- * 응답 data: { page_notices_lede: "...", page_exhibitions_lede: "...", ... }
+ * 응답 data: { page_privacy_html: "..." }
  */
 declare(strict_types=1);
 

@@ -1,13 +1,25 @@
 import { useEffect } from 'react'
 import adminCssUrl from '@/assets/css/admin.css?url'
+import commonCssUrl from '@/assets/css/common.css?url'
 import editorCssUrl from '@/assets/css/editor.css?url'
+import rentalCssUrl from '@/assets/css/rental.css?url'
 
 /** Material Icons (사이드바 아이콘 리거처) */
 const MATERIAL_ICONS_URL =
   'https://fonts.googleapis.com/icon?family=Material+Icons&display=swap'
 
+/**
+ * 관리자 화면에서만 쓰는 스타일시트.
+ *
+ * 공개 사이트는 Tailwind(src/index.css)로만 그리므로, 예전 전역 리셋과
+ * Pretendard 전체 글꼴(@font-face)은 여기서만 불러옵니다.
+ * ⚠ common.css 가 먼저, admin.css 가 나중이어야 합니다. (덮어쓰는 순서)
+ * rental.css 는 옛 대관 신청서 폼(.rental-* · .btn) 전용이라 admin.css 뒤에 둡니다.
+ */
 const MANAGED_LINKS: { href: string; rel: string }[] = [
+  { href: commonCssUrl, rel: 'stylesheet' },
   { href: adminCssUrl, rel: 'stylesheet' },
+  { href: rentalCssUrl, rel: 'stylesheet' },
   { href: MATERIAL_ICONS_URL, rel: 'stylesheet' },
 ]
 

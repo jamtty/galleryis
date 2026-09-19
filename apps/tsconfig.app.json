@@ -10,7 +10,8 @@
 
     /* Path alias (@/... → src/...) */
     "paths": {
-      "@/*": ["./src/*"]
+      "@/*": ["./src/*"],
+      "@galleryis/shared": ["./src/shared/index.ts"]
     },
 
     /* Bundler mode */

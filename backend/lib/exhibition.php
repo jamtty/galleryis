@@ -1020,10 +1020,9 @@ function exhibition_public_list(array $query)
         $params[] = $status;
     }
 
-    // 정렬 — 예정 전시는 곧 시작하는 순, 나머지는 최근 시작한 순
-    $orderSql = $status === 'upcoming'
-        ? 'ex_start_date ASC, ex_id ASC'
-        : 'ex_start_date DESC, ex_id DESC';
+    // 정렬 — 모든 탭이 시작일 오름차순(먼저 연 전시부터). 2026-09-19 에 뒤집었습니다.
+    // 관리자 목록(exhibition_list)도 같은 순서(ex_id ASC)로 맞춰 두었습니다.
+    $orderSql = 'ex_start_date ASC, ex_id ASC';
 
     $whereSql = implode(' AND ', $where);
 
@@ -1208,7 +1207,7 @@ function exhibition_list(array $query)
         . ' (SELECT COUNT(*) FROM ' . EXHIBITION_FILE_TABLE . ' f WHERE f.ex_id = e.ex_id) AS file_count'
         . ' FROM ' . EXHIBITION_TABLE . ' e'
         . ' WHERE ' . $whereSql
-        . ' ORDER BY ex_id DESC LIMIT ' . $size . ' OFFSET ' . $offset;
+        . ' ORDER BY ex_id ASC LIMIT ' . $size . ' OFFSET ' . $offset;
 
     $stmt = $pdo->prepare($sql);
     $stmt->execute($params);

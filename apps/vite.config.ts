@@ -1,4 +1,5 @@
 import { fileURLToPath, URL } from 'node:url'
+import tailwindcss from '@tailwindcss/vite'
 import react from '@vitejs/plugin-react'
 import { defineConfig, loadEnv } from 'vite'
 
@@ -21,10 +22,14 @@ function devProxy(mode: string) {
 
 // https://vite.dev/config/
 export default defineConfig(({ mode }) => ({
-  plugins: [react()],
+  plugins: [react(), tailwindcss()],
   resolve: {
     alias: {
       '@': fileURLToPath(new URL('./src', import.meta.url)),
+      // 원본 사이트(packages/shared) 의 공용 모듈을 그대로 씁니다.
+      '@galleryis/shared': fileURLToPath(
+        new URL('./src/shared/index.ts', import.meta.url),
+      ),
     },
   },
   server: {

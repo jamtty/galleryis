@@ -11,11 +11,11 @@ import AdminPage from '@/components/admin/AdminPage'
 import RichEditor from '@/components/admin/RichEditor'
 
 /**
- * 관리자 — 환경설정.
+ * 관리자 — 개인정보처리방침.
  *
  * 입력칸은 서버(backend/lib/setting.php 의 setting_definitions)가 내려 주는 정의를
  * 그대로 그립니다. 설정을 새로 추가해도 이 화면은 고칠 필요가 없습니다.
- * 문구 하나를 고치려면 [환경설정] 에서 값을 바꾸고 [저장] 을 누르면 됩니다.
+ * 내용을 고치려면 값을 바꾸고 [저장] 을 누르면 됩니다.
  */
 export default function AdminSettingPage() {
   const [groups, setGroups] = useState<SettingGroup[]>([])
@@ -53,7 +53,7 @@ export default function AdminSettingPage() {
         if (cancelled) return
 
         setLoadError(
-          err instanceof Error ? err.message : '환경설정을 불러오지 못했습니다.',
+          err instanceof Error ? err.message : '개인정보처리방침을 불러오지 못했습니다.',
         )
         setLoading(false)
       })
@@ -78,10 +78,10 @@ export default function AdminSettingPage() {
     try {
       const res = await updateSettings(values)
 
-      setDone(`환경설정 ${res.saved}개 항목을 저장했습니다.`)
+      setDone(`개인정보처리방침 ${res.saved}개 항목을 저장했습니다.`)
     } catch (err) {
       setError(
-        err instanceof Error ? err.message : '환경설정을 저장하지 못했습니다.',
+        err instanceof Error ? err.message : '개인정보처리방침을 저장하지 못했습니다.',
       )
       window.scrollTo({ top: 0, behavior: 'smooth' })
     } finally {
@@ -152,9 +152,9 @@ export default function AdminSettingPage() {
   }
 
   return (
-    <AdminPage title="환경설정">
+    <AdminPage title="개인정보처리방침">
       <section className="adm_section">
-        <h2 className="adm_section_title">환경설정</h2>
+        <h2 className="adm_section_title">개인정보처리방침</h2>
 
         {error && <p className="adm_table_notice">{error}</p>}
 

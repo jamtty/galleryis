@@ -10,7 +10,7 @@ export const PATHS = {
   /** 전시장 3D 둘러보기 — 규모로 방을 만들고 사진을 벽에 붙여 둘러봅니다. */
   hallStudio: '/halls/:key/studio',
   rental: '/rental',
-  /** 대관 신청서 작성 — /rental 에서 전시장·기간을 골라 넘어옵니다. */
+  /** 예전 대관 신청서 주소 — 이제 /rental 안에서 신청합니다. (넘겨 줍니다) */
   rentalApply: '/rental/apply',
   about: '/about',
   visit: '/visit',
@@ -46,7 +46,7 @@ export const PATHS = {
   adminPopupForm: '/admin/popups/write',
   /** 관리자 — 팝업 수정 (목록의 [상세]) */
   adminPopupEdit: '/admin/popups/edit/:id',
-  /** 관리자 — 환경설정 (페이지 안내문구 등) */
+  /** 관리자 — 개인정보처리방침 (관리자 환경설정 페이지) */
   adminSettings: '/admin/settings',
   adminMyPage: '/admin/mypage',
 } as const
@@ -83,7 +83,7 @@ export const ADMIN_MENU_SECTIONS: readonly AdminMenuSection[] = [
   {
     label: '설정',
     items: [
-      { to: PATHS.adminSettings, label: '환경설정', icon: 'settings' },
+      { to: PATHS.adminSettings, label: '개인정보처리방침', icon: 'settings' },
     ],
   },
   {
