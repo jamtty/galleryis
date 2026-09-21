@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { deleteNotices, fetchNoticeList, type NoticeListItem } from '@/api/notices'
 import AdminConfirm from '@/components/admin/AdminConfirm'
 import AdminDateRange from '@/components/admin/AdminDateRange'
@@ -291,7 +291,18 @@ export default function AdminNoticePage() {
                         listRowNumber(list.totalCount, list.page, PAGE_SIZE, index)
                       )}
                     </td>
-                    <td className="adm_td_left">{item.title}</td>
+                    <td className="adm_td_left">
+                      {/* 제목을 누르면 바로 상세(수정) 화면으로 — 오른쪽 [상세] 와 같은 곳 */}
+                      <Link
+                        to={PATHS.adminNoticeEdit.replace(
+                          ':id',
+                          String(item.id),
+                        )}
+                        className="adm_table_link"
+                      >
+                        {item.title}
+                      </Link>
+                    </td>
                     <td className="adm_td_center">{item.author || '-'}</td>
                     <td className="adm_td_center">
                       {formatDotDate(item.createdAt)}
