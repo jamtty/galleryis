@@ -1,5 +1,4 @@
 import { useState } from 'react'
-import { useEditorStyles } from '@/hooks/useAdminStyles'
 
 /**
  * 관리자 — 파일첨부 입력.
@@ -50,9 +49,6 @@ export default function FileAttachField({
   onError,
   disabled = false,
 }: FileAttachFieldProps) {
-  // 첨부 목록 스타일(.adm_file_*)은 editor.css 에 있습니다.
-  useEditorStyles()
-
   const [dragging, setDragging] = useState(false)
 
   const extensions = accept

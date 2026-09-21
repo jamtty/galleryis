@@ -114,8 +114,7 @@ export default function AdminRentalDeskPage() {
 
         <p className="adm_table_notice">
           전화나 방문으로 잡은 주를 직원이 대신 잡아 둡니다.<br />신청자 정보는 묻지
-          않습니다.<br />필요한 내용은 아래 메모에 적어 주세요.<br />입력한 사람이 기록에
-          남습니다.
+          않습니다.<br />필요한 내용은 아래 메모에 적어 주세요.
         </p>
 
         <form

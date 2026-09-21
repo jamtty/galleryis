@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react'
 import type { ReactNode } from 'react'
 import { useLocation } from 'react-router-dom'
-import { useAdminStyles } from '@/hooks/useAdminStyles'
 import AdminHeader from './AdminHeader'
 import AdminSidebar from './AdminSidebar'
 
@@ -18,8 +17,6 @@ type AdminPageProps = {
  * 좁은 화면(≤767px)에서는 사이드바가 서랍이 되고, 헤더의 메뉴 버튼으로 열고 닫습니다.
  */
 export default function AdminPage({ title, children }: AdminPageProps) {
-  useAdminStyles()
-
   const { pathname } = useLocation()
   const [menuOpen, setMenuOpen] = useState(false)
   /** 지금 서랍을 연 주소 — 다른 주소로 넘어가면 서랍을 닫습니다. */

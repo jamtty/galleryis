@@ -1,6 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import type { DragEvent } from 'react'
-import { useEditorStyles } from '@/hooks/useAdminStyles'
 import { renderBodyHtml } from '@/utils/html'
 
 /**
@@ -8,7 +7,7 @@ import { renderBodyHtml } from '@/utils/html'
  *
  * 전시개요 · 약력처럼 HTML 로 저장하는 본문에 씁니다.
  * 외부 라이브러리 없이 contentEditable + document.execCommand 로 동작합니다.
- * (에디터 스타일은 assets/css/editor.css — useEditorStyles() 가 불러옵니다)
+ * (에디터 스타일은 assets/css/editor.css — 관리자 구역(AdminApp)에서 함께 불러옵니다)
  */
 /** 업로드된 이미지 — 본문에는 url 만 쓰지만 서버가 크기까지 함께 줍니다. */
 export type EditorImage = {
@@ -98,8 +97,6 @@ export default function RichEditor({
   disabled = false,
   className,
 }: RichEditorProps) {
-  useEditorStyles()
-
   const bodyRef = useRef<HTMLDivElement>(null)
   const imageInputRef = useRef<HTMLInputElement>(null)
 

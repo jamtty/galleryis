@@ -1,5 +1,6 @@
 import { Navigate, Route, Routes } from 'react-router'
 import RequireAdmin from '@/components/admin/RequireAdmin'
+import { useAdminStyles } from '@/hooks/useAdminStyles'
 import AdminExhibitionFormPage from '@/pages/admin/AdminExhibitionFormPage'
 import AdminExhibitionPage from '@/pages/admin/AdminExhibitionPage'
 import AdminHallFormPage from '@/pages/admin/AdminHallFormPage'
@@ -26,6 +27,10 @@ import { PATHS } from '@/routes/paths'
  * admin.css/common.css 도 관리자 라우트에서만 불러옵니다.
  */
 export default function AdminApp() {
+  // 관리자 CSS(common·admin·rental·editor·Material Icons)를 여기서 한 번만
+  // 불러옵니다 — 화면을 옮겨도 <link> 가 그대로 남아 스타일이 풀리지 않습니다.
+  useAdminStyles()
+
   return (
     <Routes>
       <Route path={PATHS.adminLogin} element={<AdminLoginPage />} />

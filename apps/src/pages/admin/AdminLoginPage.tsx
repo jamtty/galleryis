@@ -2,15 +2,12 @@ import { useState } from 'react'
 import type { FormEvent } from 'react'
 import { Navigate, useLocation, useNavigate } from 'react-router-dom'
 import { loginAdmin } from '@/api/auth'
-import { useAdminStyles } from '@/hooks/useAdminStyles'
 import { PATHS } from '@/routes/paths'
 import { isTokenExpired, useAuthStore } from '@/store/useAuthStore'
 
 type LocationState = { from?: string; notice?: string }
 
 export default function AdminLoginPage() {
-  useAdminStyles()
-
   const navigate = useNavigate()
   const location = useLocation()
   const { isAuthenticated, accessToken, setAuth } = useAuthStore()
