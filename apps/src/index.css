@@ -175,6 +175,27 @@ body {
   text-decoration-color: var(--color-ink);
 }
 
+/* 옛 게시판 공지 본문 — 인라인으로 박혀 있는 글꼴·크기·색(Arial 12px 회색 등)이
+   사이트 글꼴을 덮어쓰지 않게 합니다. 그런 본문에만 붙는 표시(.is-legacy)로
+   한정해서, 새로 쓴 공지에서는 에디터의 글자 크기·색이 그대로 살아 있습니다. */
+.notice-body.is-legacy * {
+  font-family: inherit !important;
+  font-size: inherit !important;
+  color: inherit !important;
+  letter-spacing: inherit !important;
+  line-height: inherit !important;
+  font-variant-caps: inherit !important;
+}
+
+/* 공지 본문에 넣은 사진은 **본문 폭까지** 그대로 보여 줍니다 — 신청서·안내문에
+   붙인 도면·포스터는 원본 크기로 읽는 편이 낫기 때문입니다. (Tailwind 기본값이
+   img 를 max-width:100% 로 두므로 원본이 더 작으면 그 크기 그대로입니다)
+   편집기 안에서만 가로 절반으로 줄여 보여 줍니다 — editor.css 의 .is-notice */
+.notice-body img {
+  max-width: 100%;
+  height: auto;
+}
+
 /* Loading, two ways, per the usual guidance (skeletons for content whose
    layout is known, an activity mark for a blocking wait):
 

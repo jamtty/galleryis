@@ -477,3 +477,11 @@ a.adm_file_name:hover {
 .te-content .rich_editor_body.is-uploading {
   opacity: 0.6;
 }
+/* 공지 편집기 — 본문에 넣은 사진은 가로 절반까지만 보여 줍니다.
+   (발행된 공지 본문에서도 같은 폭으로 보이도록 index.css 의 .notice-body 와
+    맞춰 둡니다. Tailwind 기본값이 img 를 max-width:100% 로 두기 때문에, 큰
+    사진 하나가 본문을 통째로 덮어 버리는 것을 막습니다) */
+.rich_editor_outer.is-notice .rich_editor_body img {
+  max-width: 50%;
+  height: auto;
+}

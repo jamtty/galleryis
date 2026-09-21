@@ -35,7 +35,10 @@ if ($wrId <= 0) {
 $payload = json_decode(isset($_POST['payload']) ? (string) $_POST['payload'] : '', true);
 
 if (!is_array($payload)) {
-    json_error('공지 데이터를 읽을 수 없습니다.', 422);
+    json_error(
+        '공지 데이터를 읽을 수 없습니다. 본문에 사진을 붙여넣으면 요청이 너무 커져 서버가 거절합니다 — 사진은 에디터의 사진 버튼으로 올려 주세요.',
+        422
+    );
 }
 
 $input = notice_input($payload);

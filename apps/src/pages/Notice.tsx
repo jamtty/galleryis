@@ -9,18 +9,20 @@ import { useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { Link, useParams } from "react-router";
 import PageHead from "../components/PageHead";
+import RichText from "../components/RichText";
 import { NoticeSkeleton } from "../components/Skeleton";
-import { paragraphs } from "../lib/exhibition";
 import { useDocumentTitle } from "../lib/useDocumentTitle";
 import { GUTTER, LINK, META } from "../ui";
+import { isLegacyBoardHtml, renderBodyHtml } from "../utils/html";
 
 // One notice's page, what the legacy board opens for a row
 // (bbs/board.php?bo_table=notice&wr_id=…), in the same order: the title,
 // 작성일 · 조회, the body, the attached files.
 //
-// The body is plain text, not markdown: the origin stores a run of <br>-lined
-// text and the sync keeps it as it is, so it renders exactly as the
-// exhibition pages do: blank-line paragraphs, single breaks preserved.
+// 본문은 **HTML** 입니다 — 옛 게시판 글도(에디터가 저장한 `<div>…<span style>`) 
+// 새로 쓴 글도 HTML 이라 태그를 그대로 보여 주면 안 됩니다. `renderBodyHtml`
+// 이 태그가 없는 평문만 줄바꿈을 살려 `<br>` 로 바꾸고, 그 밖에는 그대로
+// 그립니다. (RichEditor · 개인정보처리방침과 같은 헬퍼)
 
 export default function NoticePage() {
   const { id = "" } = useParams();
@@ -85,7 +87,9 @@ export default function NoticePage() {
   }
 
   const loaded = notice!;
-  const body = paragraphs(pick(loaded, "body", i18n.language));
+  const bodyHtml = renderBodyHtml(pick(loaded, "body", i18n.language) ?? "");
+  // 옛 게시판 글은 인라인 스타일(Arial 12px 회색)을 달고 있어 사이트 글꼴로 되돌립니다.
+  const legacyBody = isLegacyBoardHtml(bodyHtml);
   const attachments = loaded.attachments ?? [];
   const images = loaded.images ?? [];
   // The legacy form's 링크 #1 / #2, which only a post written on the desk fills.
@@ -127,14 +131,11 @@ export default function NoticePage() {
               </div>
             </header>
 
-            {body.length > 0 && (
-              <div className="mt-8 space-y-4 text-base leading-relaxed">
-                {body.map((paragraph, index) => (
-                  <p key={index} className="whitespace-pre-line">
-                    {paragraph}
-                  </p>
-                ))}
-              </div>
+            {bodyHtml !== "" && (
+              <RichText
+                html={bodyHtml}
+                className={legacyBody ? "notice-body is-legacy mt-8" : "notice-body mt-8"}
+              />
             )}
 
             {images.length > 0 && (

@@ -6,6 +6,7 @@ import {
   createNotice,
   fetchNoticeDetail,
   updateNotice,
+  uploadNoticeEditorImage,
   type NoticeFile,
 } from '@/api/notices'
 import AdminAlert from '@/components/admin/AdminAlert'
@@ -214,6 +215,10 @@ export default function AdminNoticeFormPage() {
               onChange={setContent}
               placeholder="내용을 입력해 주세요."
               disabled={saving}
+              className="is-notice"
+              // 본문 이미지는 파일로 올리고 주소만 넣습니다. (base64 로 넣으면
+              // 저장 요청이 수 MB 가 되어 서버가 422 로 거절합니다)
+              onUploadImage={uploadNoticeEditorImage}
             />
           </div>
 

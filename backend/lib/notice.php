@@ -27,6 +27,21 @@ const NOTICE_BOARD_TABLE = 'g4_board';
 /** 첨부파일 폴더 (웹루트/uploads 아래 = /uploads/notice) */
 const NOTICE_UPLOAD_DIR = 'notice';
 
+/** 에디터(내용)에 넣는 이미지 폴더 — 웹루트/uploads/notice/editor */
+const NOTICE_EDITOR_DIR = 'notice/editor';
+
+/**
+ * 에디터 이미지 제한 — apps/src/api/notices.ts 와 동일하게 유지하세요.
+ *
+ * 본문에 base64(data URL) 로 이미지를 넣으면 저장 요청이 수 MB 가 되어 서버가
+ * 통째로 거절합니다(422 "공지 데이터를 읽을 수 없습니다"). 그래서 이미지는
+ * 파일로 올리고 주소만 본문에 담습니다.
+ */
+const NOTICE_EDITOR_LIMIT = [
+    'max' => 10485760, // 10MB
+    'ext' => ['jpg', 'jpeg', 'png', 'gif', 'webp'],
+];
+
 /** 첨부 제한 — apps/src/api/notices.ts 와 동일하게 유지하세요. */
 const NOTICE_FILE_LIMIT = [
     'label' => '파일첨부',
@@ -563,6 +578,49 @@ function notice_input(array $payload)
         // 상단 고정 여부 (g4_board.bo_notice 에 저장)
         'pinned' => $pinned === 'Y',
     ];
+}
+
+/**
+ * 에디터에서 올린 이미지 1건을 검증합니다. (api/notices/editor_image.php)
+ *
+ * @return array $_FILES 항목
+ */
+function notice_uploaded_editor_image()
+{
+    $files = upload_normalize_files('image');
+
+    if (count($files) === 0) {
+        json_error('올릴 이미지가 없습니다.', 422);
+    }
+
+    $file = $files[0];
+    $error = (int) $file['error'];
+
+    if ($error === UPLOAD_ERR_NO_FILE) {
+        json_error('올릴 이미지가 없습니다.', 422);
+    }
+
+    if ($error !== UPLOAD_ERR_OK) {
+        json_error('이미지: ' . notice_upload_error_text($error), 422);
+    }
+
+    $original = (string) $file['name'];
+    $extension = strtolower((string) pathinfo($original, PATHINFO_EXTENSION));
+
+    if (!in_array($extension, NOTICE_EDITOR_LIMIT['ext'], true)) {
+        json_error('이미지는 jpg · png · gif · webp 만 올릴 수 있습니다.', 422);
+    }
+
+    if ((int) $file['size'] > NOTICE_EDITOR_LIMIT['max']) {
+        json_error('이미지는 10MB 이하만 올릴 수 있습니다.', 422);
+    }
+
+    // 확장자만 이미지인 파일을 걸러냅니다.
+    if (@getimagesize((string) $file['tmp_name']) === false) {
+        json_error('이미지 파일이 아닙니다.', 422);
+    }
+
+    return $file;
 }
 
 /**

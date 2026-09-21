@@ -10,7 +10,21 @@ const HTML_BLOCK = /<(p|div|br|h[1-6]|ul|ol|li|table|blockquote|img|hr|figure)\b
 
 /** 스크립트는 실행되지 않도록 지웁니다. */
 export function stripScripts(html: string) {
-  return html.replace(/<script\b[^>]*>[\s\S]*?<\/script>/gi, '')
+  return html.replace(/<script\b[^>]*>([\s\S]*?)<\/script>/gi, '')
+}
+
+/**
+ * 옛 게시판(그누보드) 글인지 — 붙여넣기로 딸려 온 인라인 글꼴 묶음으로 봅니다.
+ *
+ * 그 시절 글은 `style="color: rgb(…); font-family: Arial, 돋움; font-size: 12px"`
+ * 같은 인라인 스타일을 달고 있어서, 그대로 그리면 공지 본문만 작고 회색인
+ * Arial 로 나옵니다. 그런 본문에만 표시를 붙여 사이트 글꼴로 되돌립니다.
+ * (새로 쓴 글에서 에디터의 글자 크기·색은 그대로 살아 있습니다)
+ */
+export function isLegacyBoardHtml(html: string) {
+  return /font-family:\s*(?:[^;]*?\b(?:Arial|Helvetica|Verdana|돋움|굴림|바탕)\b)/i.test(
+    html ?? '',
+  )
 }
 
 /**

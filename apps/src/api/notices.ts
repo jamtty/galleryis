@@ -16,6 +16,12 @@ export const NOTICE_FILE_LIMIT = {
     '.jpg,.jpeg,.png,.gif,.webp,.bmp,.pdf,.hwp,.hwpx,.txt,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.zip',
 } as const
 
+/** 에디터 이미지 제한 — backend/lib/notice.php 와 동일하게 유지하세요. */
+export const NOTICE_EDITOR_LIMIT = {
+  sizeMB: 10,
+  accept: '.jpg,.jpeg,.png,.gif,.webp',
+} as const
+
 /** 등록·수정 입력값 — backend/api/notices/create.php 의 payload */
 export type NoticeInput = {
   title: string
@@ -25,6 +31,24 @@ export type NoticeInput = {
   link2: string
   /** 상단 고정 (g4_board.bo_notice) */
   pinned: 'Y' | 'N'
+}
+
+/**
+ * 에디터(내용)에 넣을 이미지 업로드 (관리자)
+ *
+ * 이미지를 본문에 base64 로 넣으면 저장 요청이 수 MB 가 되어 서버가 거절합니다.
+ * 그래서 파일로 올리고 **주소만** 본문에 넣습니다. (전시 에디터와 같은 방식)
+ *
+ * 등록을 취소하면 올린 이미지는 서버에 남습니다.
+ */
+export function uploadNoticeEditorImage(file: File) {
+  const form = new FormData()
+  form.append('image', file)
+
+  return apiRequest<{ url: string; name: string; width: number; height: number }>(
+    '/api/notices/editor_image.php',
+    { method: 'POST', form },
+  )
 }
 
 /** 서버에 저장된 첨부 1건 */

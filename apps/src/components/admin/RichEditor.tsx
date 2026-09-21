@@ -28,6 +28,11 @@ type RichEditorProps = {
    */
   onUploadImage?: (file: File) => Promise<EditorImage>
   disabled?: boolean
+  /**
+   * 편집기 겉상자에 덧붙일 클래스 — 화면별로 다른 모양을 줄 때 씁니다.
+   * (예: 공지 편집기는 본문 사진을 가로 절반까지만 보여 줍니다 — `is-notice`)
+   */
+  className?: string
 }
 
 /** 글자색 팔레트 */
@@ -91,6 +96,7 @@ export default function RichEditor({
   placeholder = '내용을 입력해 주세요.',
   onUploadImage,
   disabled = false,
+  className,
 }: RichEditorProps) {
   useEditorStyles()
 
@@ -370,7 +376,13 @@ export default function RichEditor({
 
   return (
     <div
-      className={dragging ? 'rich_editor_outer is-dragover' : 'rich_editor_outer'}
+      className={[
+        'rich_editor_outer',
+        dragging ? 'is-dragover' : '',
+        className ?? '',
+      ]
+        .filter(Boolean)
+        .join(' ')}
       onDragOver={(event) => {
         if (disabled) return
         event.preventDefault()
