@@ -28,7 +28,8 @@ import { PATHS } from '@/routes/paths'
  */
 export default function AdminApp() {
   // 관리자 CSS(common·admin·rental·editor·Material Icons)를 여기서 한 번만
-  // 불러옵니다 — 화면을 옮겨도 <link> 가 그대로 남아 스타일이 풀리지 않습니다.
+  // 붙입니다 — 화면을 옮겨도 스타일이 풀리지 않습니다.
+  // (F5 로 새로고침해도 첫 화면부터 적용 — 자세한 까닭은 hooks/useAdminStyles.ts)
   useAdminStyles()
 
   return (

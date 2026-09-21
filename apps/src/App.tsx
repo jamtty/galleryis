@@ -1,6 +1,6 @@
 import { fetchJson, pick, type NoticeSummary } from "@galleryis/shared";
 import { useQuery } from "@tanstack/react-query";
-import { useEffect, useRef, useState } from "react";
+import { Suspense, lazy, useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
   Link,
@@ -14,7 +14,6 @@ import BackToTop from "./components/BackToTop";
 import DefRow from "./components/DefRow";
 import ErrorBoundary from "./components/ErrorBoundary";
 import HallStudioRoute from "./components/HallStudioRoute";
-import AdminApp from "./AdminApp";
 import { ExhibitionList } from "./components/ExhibitionCard";
 import NowShowing from "./components/NowShowing";
 import Popup from "./components/Popup";
@@ -459,11 +458,40 @@ function LegacyRentalApply() {
   return <Navigate to={`/rental${search}`} replace />;
 }
 
+// 관리자 화면은 따로 실어 둡니다 — 관리자 CSS(약 80KB)가 공개 사이트 번들에
+// 들어가지 않고, 관리자 청크가 실행되는 순간 스타일이 붙어 첫 화면부터
+// 제대로 그려집니다. (F5 때 로고가 크게 보였다 작아지던 깜빡임의 원인)
+const AdminApp = lazy(() => import("./AdminApp"));
+
+/** 관리자 묶음을 받는 동안의 화면 — CSS 없이도 어색하지 않게 인라인 스타일로.
+ *  (관리자 CSS 의 글꼴 크기 기준은 rem 이라, rem 을 쓰면 기준이 바뀔 때 흔들립니다) */
+function AdminBoot() {
+  return (
+    <div
+      style={{
+        display: "grid",
+        placeItems: "center",
+        minHeight: "100dvh",
+        font: "500 14px/1.6 Pretendard, dotum, sans-serif",
+        color: "#6b7280",
+      }}
+    >
+      관리자 화면을 여는 중입니다…
+    </div>
+  );
+}
+
 export default function App() {
   const { pathname } = useLocation();
   // 관리자 화면은 공개 사이트의 헤더·푸터와 다른 스타일시트를 씁니다.
   // (원래 구조를 그대로 두기 위해 라우트를 섞지 않고 여기서 갈라 줍니다)
-  if (pathname.startsWith("/admin")) return <AdminApp />;
+  if (pathname.startsWith("/admin")) {
+    return (
+      <Suspense fallback={<AdminBoot />}>
+        <AdminApp />
+      </Suspense>
+    );
+  }
 
   // 3D 둘러보기는 원본처럼 **한 화면 전체**를 씁니다 — 자체 하단 바(이름·규격·
   // 도면·대관 신청)를 들고 있어서 사이트 머리글·바닥글 안에 넣지 않습니다.
