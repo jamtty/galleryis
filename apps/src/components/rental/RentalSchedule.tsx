@@ -176,8 +176,8 @@ export default function RentalSchedule({
               <span className="rental-filter__date">
                 {formatDotDate(rangeStart)}
               </span>
-              <span className="rental-filter__tilde" aria-hidden="true">
-                ~
+              <span className="rental-filter__dash" aria-hidden="true">
+                -
               </span>
               <span className="rental-filter__date">
                 {formatDotDate(weeks[weeks.length - 1].end)}
@@ -269,7 +269,11 @@ export default function RentalSchedule({
                             }
                             onClick={() => apply(hall.id, week)}
                           >
-                            {deskApply ? '대리 신청' : '대관신청'}
+                            {/* 칸의 이름은 범례와 같은 말로 — 빈 칸은 어느 화면에서나
+                                '신청가능' 입니다 (2026-10-02). */}
+                            {deskApply
+                              ? RENTAL_STATUS_LABELS.available
+                              : '대관신청'}
                           </button>
                         </td>
                       )

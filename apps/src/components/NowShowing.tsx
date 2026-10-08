@@ -2,7 +2,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Link } from "react-router";
-import { hallLabel, showTitle, useExhibitions } from "../lib/exhibition";
+import { hallLabel, showLang, showTitle, useExhibitions } from "../lib/exhibition";
 import { HeroSkeleton } from "./Skeleton";
 import { BUTTON_OUTLINE, GUTTER } from "../ui";
 
@@ -50,7 +50,7 @@ export default function NowShowing({
 }: {
   query: ReturnType<typeof useExhibitions>;
 }) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const items = query.data ?? [];
   const [index, setIndex] = useState(0);
   const [paused, setPaused] = useState(false);
@@ -103,8 +103,8 @@ export default function NowShowing({
   }
 
   const current = items[index % count];
-  const title = showTitle(current);
-  const hall = hallLabel(current, t);
+  const title = showTitle(current, i18n.language);
+  const hall = hallLabel(current, t, i18n.language);
   const image = current.images?.[0];
   const href = `/exhibitions/${current.id}`;
   const pick_ = (i: number) => {
@@ -142,10 +142,11 @@ export default function NowShowing({
               </>
             )}
           </p>
-          {/* The show's own name, Korean in both locales — see showTitle.
-              `lang` so a screen reader on the English page switches voice. */}
+          {/* The show's own name — Korean under KO, the machine translation
+              under EN (see showTitle). `lang` keeps a screen reader's voice
+              right either way. */}
           <h1
-            lang="ko"
+            lang={showLang(i18n.language, current.title_en)}
             className="mt-4 font-display text-display font-bold break-keep"
           >
             <Link to={href} className="transition-colors hover:text-ink-soft">

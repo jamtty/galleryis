@@ -38,6 +38,7 @@ import {
 import { viewpointFor } from "../lib/viewpoint";
 import { useCameraStore } from "../store/camera";
 import { useWorksStore } from "../store/works";
+import Loader from "../components/Loader";
 import Artworks from "./Artworks";
 import Extinguisher from "./Extinguisher";
 import FirstPersonRig, {
@@ -697,30 +698,19 @@ function LightRig({ runs, height }: { runs: TrackRun[]; height: number }) {
   );
 }
 
-function EntryVeil({ photo }: { photo: string | undefined }) {
-  const [faded, setFaded] = useState(false);
-  const [gone, setGone] = useState(false);
-  useEffect(() => {
-    const fade = setTimeout(() => setFaded(true), 250);
-    const remove = setTimeout(() => setGone(true), 1200);
-    return () => {
-      clearTimeout(fade);
-      clearTimeout(remove);
-    };
-  }, []);
-  if (gone) return null;
-  return (
-    <div
-      aria-hidden
-      className={`pointer-events-none absolute inset-0 transition-opacity duration-700 ease-out ${faded ? "opacity-0" : "opacity-100"}`}
-    >
-      {photo ? (
-        <img src={photo} alt="" className="h-full w-full object-cover" />
-      ) : (
-        <div className="h-full w-full bg-ground" />
-      )}
-    </div>
-  );
+// The first drawn frame, reported out so the loading mark in the parent can
+// stand until there is a room to see. A cold shader compile leaves the canvas
+// blank for a visible stretch, and the frame is the first moment the mark may
+// be trusted to come down. The frame callbacks run before R3F's own
+// `gl.render` in the same tick, so the update lands after the pixels do.
+function FirstFrame({ onDrawn }: { onDrawn: () => void }) {
+  const drawn = useRef(false);
+  useFrame(() => {
+    if (drawn.current) return;
+    drawn.current = true;
+    onDrawn();
+  });
+  return null;
 }
 
 // Re-frames the dollhouse whenever orbit mode (re)activates, the walk rig
@@ -847,6 +837,8 @@ export default function HallScene({
   );
 
   const [mode, setMode] = useState<"orbit" | "walk">("orbit");
+  // The canvas has painted a frame — the loading mark comes down. See <FirstFrame>.
+  const [drawn, setDrawn] = useState(false);
   // While an artwork drag is live, both camera rigs must let the pointer go.
   const draggingArtwork = useWorksStore((state) => state.draggingId !== null);
   const worksCount = useWorksStore((state) => state.works.length);
@@ -997,6 +989,7 @@ export default function HallScene({
         <LightRig runs={lightingRuns} height={height} />
         <OverviewFraming reach={reach} enabled={!walking} />
         <ModeFov walking={walking} />
+        <FirstFrame onDrawn={() => setDrawn(true)} />
         {labels.map((label) => (
           <FeatureLabel key={label.key} position={label.position}>
             {t(`hallView.${label.key}`)}
@@ -1078,7 +1071,16 @@ export default function HallScene({
           </button>
         )}
       </div>
-      <EntryVeil photo={hall.photos?.[0]} />
+      {/* The wait, over the canvas, until the first frame is drawn. This is
+          what the studio opens on since 2026-10-02: it used to open on the
+          hall's own photograph, which faded on a fixed timer whether or not
+          the room was ready — so the photograph came and went, and the wait
+          began after it. The gallery asked for the mark instead. */}
+      {!drawn && (
+        <div className="absolute inset-0 z-10 grid place-items-center bg-ground">
+          <Loader label={t("hallView.loading")} />
+        </div>
+      )}
     </div>
   );
 }

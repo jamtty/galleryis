@@ -5,6 +5,7 @@
  * 공개 전시 목록입니다. 노출(Y) 중인 전시만 나옵니다.
  *
  *   status : '' 전체 | 'current' 현재전시 | 'upcoming' 예정전시 | 'past' 지난전시
+ *   keyword: 전시회명 · 전시장소 · 작가명 검색어 (2026-10-02)
  *   page   : 1부터 (기본 1)
  *   size   : 기본 12 (최대 48)
  *
@@ -37,6 +38,7 @@ if (!exhibition_table_exists(EXHIBITION_TABLE)) {
 try {
     json_ok(exhibition_public_list([
         'status' => isset($_GET['status']) ? (string) $_GET['status'] : '',
+        'keyword' => isset($_GET['keyword']) ? (string) $_GET['keyword'] : '',
         'page' => isset($_GET['page']) ? (int) $_GET['page'] : 1,
         'size' => isset($_GET['size']) ? (int) $_GET['size'] : 12,
     ]));

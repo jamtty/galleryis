@@ -19,7 +19,11 @@ export default function PrivacyPage() {
   const policy = privacyPolicy(i18n.language);
 
   // 관리자가 쓴 방침 (서버가 script·style 등을 걸러 저장합니다)
-  const managed = renderBodyHtml(settings.pagePrivacyHtml);
+  const korean = renderBodyHtml(settings.pagePrivacyHtml);
+  // 영문 본문 — 한국어 원문을 번역해 둔 것 (없으면 한국어 그대로)
+  const english = renderBodyHtml(settings.pagePrivacyHtmlEn);
+  const useEnglish = i18n.language.startsWith("en") && english !== "";
+  const managed = useEnglish ? english : korean;
 
   // The link sits at the foot of every page, and a client-side navigation
   // keeps the scroll position of the page it left: without this the policy
@@ -37,7 +41,14 @@ export default function PrivacyPage() {
       <article className={`py-10 sm:py-14 ${GUTTER}`}>
         <div className="mx-auto max-w-3xl text-base leading-relaxed break-keep">
           {managed ? (
-            <div className="rich" dangerouslySetInnerHTML={{ __html: managed }} />
+            <>
+              {useEnglish && (
+                <p className="mb-8 text-sm text-ink-soft">
+                  {t("privacyPage.machine")}
+                </p>
+              )}
+              <div className="rich" dangerouslySetInnerHTML={{ __html: managed }} />
+            </>
           ) : (
             <>
               {i18n.language.startsWith("en") && (

@@ -22,7 +22,12 @@
 # ---------------------------------------------------------------------------
 
 Options -Indexes
-DirectoryIndex index.html
+# ⚠ index.php 를 빼면 안 됩니다 (2026-10-08 겪음).
+#   PHP 폴더(/phpMyAdmin 등)는 index.php 로 열리는데, 여기서 index.html 만 적으면
+#   Apache 가 그 폴더에서 index.html 을 찾다가 못 찾고(Options -Indexes) **403** 을 냅니다.
+#   → /phpMyAdmin/ = 403, /phpMyAdmin/index.php = 200 이 되는 정체.
+#   먼저 맞는 것이 이깁니다 → 루트(/)는 그대로 index.html.
+DirectoryIndex index.html index.php
 
 <IfModule mod_rewrite.c>
   RewriteEngine On

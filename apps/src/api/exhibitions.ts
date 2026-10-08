@@ -253,8 +253,16 @@ export function updateExhibition(
 export type PublicExhibitionItem = {
   id: number
   title: string
+  /** 영문 전시명 (기계 번역 · 없으면 빈 문자열) */
+  titleEn?: string
   artist: string
+  /** 영문 작가명 (기계 번역 · 없으면 빈 문자열) */
+  artistEn?: string
+  /** 'machine' 영문 있음 · 'missing' 없음 */
+  translation?: string
   place: string
+  /** 영문 전시장소 (기계 번역 · 없으면 빈 문자열) */
+  placeEn?: string
   /** YYYY-MM-DD */
   startDate: string
   endDate: string
@@ -276,8 +284,12 @@ export type PublicExhibitionListResponse = {
 export type PublicExhibitionDetail = PublicExhibitionItem & {
   /** 전시개요 (HTML) */
   overview: string
+  /** 영문 전시개요 (기계 번역 · HTML · 없으면 빈 문자열) */
+  overviewEn?: string
   /** 작가 약력 (HTML) */
   bio: string
+  /** 영문 작가 약력 (기계 번역 · HTML · 없으면 빈 문자열) */
+  bioEn?: string
   hit: number
   files: ExhibitionFile[]
 }
@@ -285,6 +297,8 @@ export type PublicExhibitionDetail = PublicExhibitionItem & {
 export type PublicExhibitionListQuery = {
   /** '' 전체 | 'current' | 'upcoming' | 'past' */
   status?: string
+  /** 전시회명 · 전시장소 · 작가명 검색어 (있으면 상태를 가리지 않습니다) */
+  keyword?: string
   page?: number
   size?: number
 }

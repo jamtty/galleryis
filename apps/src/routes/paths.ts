@@ -50,6 +50,8 @@ export const PATHS = {
   adminPopupEdit: '/admin/popups/edit/:id',
   /** 관리자 — 개인정보처리방침 (관리자 환경설정 페이지) */
   adminSettings: '/admin/settings',
+  /** 관리자 — 영문 번역 (기계 번역 현황·일괄 실행) */
+  adminTranslate: '/admin/translate',
   adminMyPage: '/admin/mypage',
 } as const
 
@@ -86,6 +88,7 @@ export const ADMIN_MENU_SECTIONS: readonly AdminMenuSection[] = [
     label: '설정',
     items: [
       { to: PATHS.adminSettings, label: '개인정보처리방침', icon: 'settings' },
+      { to: PATHS.adminTranslate, label: '영문 번역', icon: 'translate' },
     ],
   },
   {

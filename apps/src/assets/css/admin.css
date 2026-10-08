@@ -664,6 +664,14 @@ select.adm_btn_secondary {
   font-size: 1.3rem;
   color: #6b7280;
 }
+/* 영문 번역 화면 — 표 아래 안내문.
+   표 테두리 안쪽에 딱 붙어 보이지 않게 안쪽 여백을 줍니다. */
+.adm_translate_note {
+  padding: 1.6rem 2rem 1.8rem;
+  font-size: 1.2rem;
+  line-height: 1.5;
+  color: #9ca3af;
+}
 .adm_table {
   width: 100%;
   border-collapse: collapse;
@@ -905,7 +913,7 @@ select.adm_btn_secondary {
   color: var(--color-ink);
   font-variant-numeric: tabular-nums;
 }
-.rental-filter__tilde {
+.rental-filter__dash {
   color: var(--color-ink-soft);
 }
 

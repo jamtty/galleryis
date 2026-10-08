@@ -17,6 +17,7 @@ import { useParams } from "react-router";
 import LanguageToggle from "../components/LanguageToggle";
 import Loader from "../components/Loader";
 import WorksPanel from "../components/WorksPanel";
+import { hallSpecText } from "@/lib/hall";
 import { MAX_WORKS } from "../lib/artworkImage";
 import { useWorksStore } from "../store/works";
 
@@ -128,11 +129,17 @@ function StickyBar({
             {pick(hall, "name", i18n.language)}
           </h1>
           <span className="text-sm text-ink-soft tabular-nums">
-            {t("hallView.specs", {
-              area: hall.area_m2,
-              pyeong: hall.pyeong,
-              ceiling: hall.ceiling_cm,
-            })}
+            {/* 한국어는 관리자가 쓴 규모 문장 그대로, 영문은 화면이 만드는 영문 문구.
+                (lib/hall.ts 의 hallSpecText) */}
+            {hallSpecText(
+              hall,
+              i18n.language,
+              t("hallView.specs", {
+                area: hall.area_m2,
+                pyeong: hall.pyeong,
+                ceiling: hall.ceiling_cm,
+              }),
+            )}
           </span>
           {/* The drawing this room was traced from, one tap away, the model
               should be checkable against the gallery's own plan. A path, not

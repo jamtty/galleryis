@@ -35,14 +35,11 @@ import RentalTerms from "./RentalTerms";
 // and three boxes for a phone number is more taps for an older applicant, not
 // fewer.
 
-/** "2026.09.30, 10.06", the period as the gallery writes it. */
+/** "2026.09.30 - 2026.10.06", the period as the gallery writes it. */
 function periodLabel(week: AvailabilityWeek): string {
-  const [, sm, sd] = week.start.split("-");
+  const [sy, sm, sd] = week.start.split("-");
   const [ey, em, ed] = week.end.split("-");
-  const [sy] = week.start.split("-");
-  return sy === ey
-    ? `${sy}.${sm}.${sd} ~ ${em}.${ed}`
-    : `${sy}.${sm}.${sd} ~ ${ey}.${em}.${ed}`;
+  return `${sy}.${sm}.${sd} - ${ey}.${em}.${ed}`;
 }
 
 const FIELD =

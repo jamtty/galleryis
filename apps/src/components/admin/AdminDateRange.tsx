@@ -1,7 +1,7 @@
 import DatePicker from './DatePicker'
 
 /**
- * 관리자 목록 검색 — 기간(시작일 ~ 종료일).
+ * 관리자 목록 검색 — 기간(시작일 - 종료일).
  *
  * `.adm_search_row` 안에서 그대로 쓰는 조각입니다.
  * (날짜를 고르면 반대쪽 날짜가 앞뒤로 뒤집히지 않도록 minDate/maxDate 를 겁니다)
@@ -40,7 +40,7 @@ export default function AdminDateRange({
         title={title}
       />
 
-      <span className="adm_search_label">~</span>
+      <span className="adm_search_label">-</span>
 
       <DatePicker
         value={to}

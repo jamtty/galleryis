@@ -52,8 +52,8 @@ function periodText(item: PopupItem) {
   }
 
   return item.periodStart
-    ? `${formatDotDate(item.periodStart)} ~`
-    : `~ ${formatDotDate(item.periodEnd)}`
+    ? `${formatDotDate(item.periodStart)} -`
+    : `- ${formatDotDate(item.periodEnd)}`
 }
 
 /**

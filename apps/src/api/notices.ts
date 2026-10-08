@@ -124,6 +124,10 @@ export function fetchNoticeDetail(id: number) {
 export type NoticeListItem = {
   id: number
   title: string
+  /** 영문 제목 (기계 번역 · 없으면 빈 문자열) */
+  titleEn?: string
+  /** 'machine' 영문 있음 · 'missing' 없음 */
+  translation?: string
   /** 상단 고정 여부 */
   pinned: boolean
   author: string
@@ -195,8 +199,14 @@ export type PublicNoticeNeighbour = { id: number; title: string } | null
 export type PublicNoticeDetail = {
   id: number
   title: string
+  /** 영문 제목 (기계 번역 · 없으면 빈 문자열) */
+  titleEn?: string
   /** 본문 (HTML 또는 옛 평문) */
   content: string
+  /** 영문 본문 (기계 번역 · HTML · 없으면 빈 문자열) */
+  bodyEn?: string
+  /** 'machine' 영문 있음 · 'missing' 없음 */
+  translation?: string
   link1: string
   link2: string
   pinned: boolean

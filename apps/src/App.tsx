@@ -14,6 +14,7 @@ import BackToTop from "./components/BackToTop";
 import DefRow from "./components/DefRow";
 import ErrorBoundary from "./components/ErrorBoundary";
 import HallStudioRoute from "./components/HallStudioRoute";
+import HeaderSearch from "./components/HeaderSearch";
 import { ExhibitionList } from "./components/ExhibitionCard";
 import NowShowing from "./components/NowShowing";
 import Popup from "./components/Popup";
@@ -58,7 +59,7 @@ function LanguageToggle() {
       type="button"
       // min-h for the touch target, nowrap because "한국어" otherwise breaks
       // mid-word when the phone-width masthead runs out of room.
-      className="inline-flex min-h-11 items-center text-sm whitespace-nowrap text-ink-soft transition-colors hover:text-ink"
+      className="inline-flex min-h-11 shrink-0 items-center text-sm whitespace-nowrap text-ink-soft transition-colors hover:text-ink"
       onClick={() => void i18n.changeLanguage(next)}
     >
       {next === "en" ? "English" : "한국어"}
@@ -177,6 +178,9 @@ function Masthead() {
             aria-label={t("nav.label")}
             className={`${open ? "flex" : "hidden"} absolute inset-x-0 top-full max-h-[calc(100dvh-4rem)] flex-col divide-y divide-line overflow-y-auto border-b border-line bg-ground lg:static lg:flex lg:max-h-none lg:flex-row lg:items-center lg:gap-x-8 lg:divide-y-0 lg:overflow-visible lg:border-b-0`}
           >
+            {/* 막대에 자리가 없는 폭(1024px 미만)의 검색 자리 — 접힌 메뉴의
+                첫 줄입니다. 메뉴를 열면 필드가 바로 보입니다. */}
+            <HeaderSearch variant="menu" />
             {NAV.map(({ id, to, also }) => {
               // /exhibitions/:id keeps the 전시 tab lit, and /notices/:id 소식;
               // /visit, a section of 갤러리 이즈, keeps 갤러리 이즈 lit.
@@ -200,7 +204,14 @@ function Masthead() {
               );
             })}
           </nav>
-          <div className="flex shrink-0 items-center gap-x-3">
+          {/* `min-w-0 shrink` 은 검색 필드를 위한 것입니다 — 15rem 을 바탕으로
+              두되 자리가 모자라면 필드가 먼저 줄어들도록 (아래 두 버튼은
+              `shrink-0`). */}
+          <div className="flex min-w-0 shrink items-center gap-x-3">
+            {/* 검색은 언어 전환 왼쪽 (2026-10-02) — 아래선 하나만 보이는 필드.
+                자리는 `lg` 부터이고, 그 아래 폭에서는 접힌 메뉴의 첫 줄입니다
+                (폰 막대에는 자리가 없습니다: 워드마크만 203px). */}
+            <HeaderSearch />
             <LanguageToggle />
             {/* Icon only; the word is its accessible name. 44px square,
                 the touch target, bleeding into the gutter so the icon
@@ -212,7 +223,7 @@ function Masthead() {
               aria-expanded={open}
               aria-controls="site-menu"
               onClick={() => setOpen((value) => !value)}
-              className="-mr-2.5 inline-flex h-11 w-11 items-center justify-center text-ink lg:hidden"
+              className="-mr-2.5 inline-flex h-11 w-11 shrink-0 items-center justify-center text-ink lg:hidden"
             >
               <MenuIcon open={open} />
             </button>

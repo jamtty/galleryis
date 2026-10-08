@@ -6,6 +6,7 @@ import { Link, useLocation } from "react-router";
 import PageHead from "../components/PageHead";
 import { HallsSkeleton } from "../components/Skeleton";
 import { krw, TIERS } from "../lib/pricing";
+import { hallSpecText } from "../lib/hall";
 import { useDocumentTitle } from "../lib/useDocumentTitle";
 // 우리 백엔드에 맞춘 전시장 정보 (도면·조감도 주소 포함)
 import type { SiteHall } from "../shared/backend";
@@ -147,11 +148,17 @@ export default function HallsPage() {
                       <dd className={TABLE_VALUE}>{hall.floor}</dd>
                       <dt className={TABLE_LABEL}>{t("hallsPage.size")}</dt>
                       <dd className={`${TABLE_VALUE} tabular-nums`}>
-                        {t("halls.specs", {
-                          area: hall.area_m2,
-                          pyeong: hall.pyeong,
-                          ceiling: hall.ceiling_cm,
-                        })}
+                        {/* 한국어는 관리자가 쓴 규모 문장 그대로, 영문은 화면이 만드는
+                            영문 문구. (lib/hall.ts 의 hallSpecText) */}
+                        {hallSpecText(
+                          hall,
+                          i18n.language,
+                          t("halls.specs", {
+                            area: hall.area_m2,
+                            pyeong: hall.pyeong,
+                            ceiling: hall.ceiling_cm,
+                          }),
+                        )}
                       </dd>
                       {/* The three seasonal fees, each with the months it
                           covers written out. A fragment, not a row box: the

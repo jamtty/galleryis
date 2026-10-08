@@ -17,8 +17,9 @@ export default function AdminRentalSchedulePage() {
       <section className="adm_section">
         <h2 className="adm_section_title">전시 기간 확인 및 신청</h2>
         <p className="adm_table_notice">
-          신청가능 칸을 누르면 대리 신청(전화 · 방문 접수) 화면이 열립니다.
-          심사중 · 대관완료 칸을 누르면 그 대관 신청서로 넘어갑니다.
+          신청가능 칸을 누르면 전화 · 방문으로 받은 주를 직원이 대신 접수하는
+          화면이 열립니다. 심사중 · 대관완료 칸을 누르면 그 대관 신청서로
+          넘어갑니다.
         </p>
         <div className="adm_schedule">
           <RentalSchedule linkRequests deskApply defaultUnit="2y" />

@@ -46,6 +46,17 @@ export const resources = {
         menu: "메뉴",
         close: "닫기",
       },
+      // 헤더 검색 (2026-10-02) — 막대에 앉은 필드 하나. 전시만 찾습니다:
+      // 소식은 자기 목록이 검색할 만큼 길지 않습니다. 결과는 전시 목록 페이지
+      // (`/exhibitions?keyword=…`)에 나오고, 그 페이지가 아래 문구를 씁니다.
+      search: {
+        label: "전시 검색",
+        submit: "검색",
+        clear: "지우기",
+        resultFor: "'{{keyword}}' 검색 결과",
+        empty: "관련된 전시가 없습니다",
+        all: "전체 전시 보기",
+      },
       viewAll: "전체 보기",
       // The show's own page, section for section what the legacy view
       // (bbs/board.php?bo_table=gallery&wr_id=…) prints: 전시기간 · 전시장소
@@ -134,6 +145,8 @@ export const resources = {
       // not UI copy.
       privacyPage: {
         title: "개인정보처리방침",
+        machine:
+          "영문 방침은 기계 번역이며, 한국어가 원문입니다.",
       },
       // 갤러리 소개. The introduction — introHeading and intro1~4 — is the
       // gallery's newly written one, supplied on 2026-08-28 and set here
@@ -375,6 +388,14 @@ export const resources = {
         menu: "Menu",
         close: "Close",
       },
+      search: {
+        label: "Search exhibitions",
+        submit: "Search",
+        clear: "Clear",
+        resultFor: "Shows matching “{{keyword}}”",
+        empty: "No shows match that",
+        all: "All exhibitions",
+      },
       viewAll: "View all",
       exhibition: {
         back: "All exhibitions",
@@ -439,6 +460,8 @@ export const resources = {
       },
       privacyPage: {
         title: "Privacy Policy",
+        machine:
+          "The English policy is machine-translated; the Korean is the original.",
       },
       aboutPage: {
         title: "About Gallery IS",

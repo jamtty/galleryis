@@ -17,6 +17,7 @@ require_once __DIR__ . '/db.php';
 require_once __DIR__ . '/response.php';
 require_once __DIR__ . '/upload.php';
 require_once __DIR__ . '/html.php';
+require_once __DIR__ . '/translation.php';
 
 const NOTICE_TABLE = 'g4_write_notice';
 const NOTICE_BOARD = 'notice';
@@ -946,6 +947,12 @@ function notice_create(array $input, array $files, array $admin)
 
         $pdo->commit();
 
+        // 영문 (기계 번역) — 실패해도 등록은 끝난 것으로 봅니다.
+        translation_ensure('notice', $wrId, [
+            'title' => (string) $input['title'],
+            'body' => (string) $input['content'],
+        ]);
+
         return $wrId;
     } catch (Throwable $e) {
         $pdo->rollBack();
@@ -977,6 +984,12 @@ function notice_update($wrId, array $input)
         (string) $input['link2'],
         (new DateTimeImmutable())->format('Y-m-d H:i:s'),
         (int) $wrId,
+    ]);
+
+    // 영문 (기계 번역) — 한국어를 고쳤으면 지문이 달라져 다시 번역됩니다.
+    translation_ensure('notice', $wrId, [
+        'title' => (string) $input['title'],
+        'body' => (string) $input['content'],
     ]);
 }
 
@@ -1069,6 +1082,11 @@ function notice_delete($wrId)
         notice_set_pinned($wrId, false);
     }
 
+    // 공지를 지우면 그 영문도 함께 지웁니다.
+    if ($post) {
+        translation_forget('notice', $wrId);
+    }
+
     return ['files' => $removed, 'post' => $post];
 }
 
@@ -1157,11 +1175,16 @@ function notice_public_detail($wrId)
     }
 
     $neighbours = notice_neighbours($wrId);
+    // 영문 (기계 번역 · backend/lib/translation.php) — 없으면 빈 값입니다.
+    $en = translation_texts('notice', (int) $wrId);
 
     return [
         'id' => $detail['id'],
         'title' => $detail['title'],
+        'titleEn' => isset($en['title']) ? $en['title'] : '',
         'content' => $detail['content'],
+        'bodyEn' => isset($en['body']) ? $en['body'] : '',
+        'translation' => $en === [] ? 'missing' : 'machine',
         'link1' => $detail['link1'],
         'link2' => $detail['link2'],
         'pinned' => $detail['pinned'],
@@ -1184,10 +1207,13 @@ function notice_public_detail($wrId)
 function notice_list_item(array $row, $files = 0)
 {
     $wrId = (int) $row['wr_id'];
+    $en = translation_texts('notice', $wrId);
 
     return [
         'id' => $wrId,
         'title' => (string) $row['wr_subject'],
+        'titleEn' => isset($en['title']) ? $en['title'] : '',
+        'translation' => $en === [] ? 'missing' : 'machine',
         'pinned' => in_array($wrId, notice_pinned_ids(), true),
         'author' => (string) $row['wr_name'],
         'hit' => (int) $row['wr_hit'],

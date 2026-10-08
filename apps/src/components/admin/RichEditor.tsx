@@ -245,6 +245,11 @@ export default function RichEditor({
       if (disabled) return
 
       restoreSelection()
+      // 관리자 화면의 전역 리셋(common.css `* { font: inherit; color: inherit }`)이
+      // 요소 방식 서식(<b>, <font size|color>)을 지워 버립니다. 인라인 style 로
+      // 쓰게 하면 편집기와 공개 화면이 같은 모습으로 보입니다.
+      // (색·크기처럼 CSS 로 되살릴 수 없는 값도 이렇게 해야 보입니다)
+      document.execCommand('styleWithCSS', false, 'true')
       document.execCommand(command, false, argument)
       emit()
       syncToolbar()

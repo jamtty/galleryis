@@ -399,7 +399,7 @@ export default function AdminPopupFormPage() {
                 variant="form"
                 disabled={saving}
               />
-              <span>~</span>
+              <span>-</span>
               <DatePicker
                 value={periodEnd}
                 onChange={setPeriodEnd}

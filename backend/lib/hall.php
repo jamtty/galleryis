@@ -25,6 +25,7 @@ declare(strict_types=1);
 require_once __DIR__ . '/db.php';
 require_once __DIR__ . '/response.php';
 require_once __DIR__ . '/upload.php';
+require_once __DIR__ . '/translation.php';
 
 const HALL_TABLE = 'hall';
 const HALL_PHOTO_TABLE = 'hall_photo';
@@ -257,13 +258,19 @@ function hall_item(array $row, array $photos = [])
 {
     // 마이그레이션 전 서버에서는 칼럼이 없을 수 있습니다.
     $planName = isset($row['h_plan_name']) ? (string) $row['h_plan_name'] : '';
+    // 영문 이름 (기계 번역) — 번호표(h_key)로 찾습니다.
+    $en = translation_texts('hall', (string) $row['h_key']);
 
     return [
         'id' => (int) $row['h_id'],
         'key' => (string) $row['h_key'],
         'name' => (string) $row['h_name'],
+        'nameEn' => isset($en['name']) ? $en['name'] : '',
         'floor' => (string) $row['h_floor'],
         'spec' => (string) $row['h_spec'],
+        // 영문 규모 문장 (기계 번역) — 화면은 관리자가 쓴 문장을 그대로 쓰고,
+        // 영문 화면에서는 이것을 씁니다.
+        'specEn' => isset($en['spec']) ? $en['spec'] : '',
         'pricePeak' => (int) $row['h_price_peak'],
         'monthPeak' => (string) $row['h_month_peak'],
         'priceOff' => (int) $row['h_price_off'],
@@ -608,7 +615,7 @@ function hall_update($hallId, array $input, $sheet, $plan, array $photos, array 
     $pdo = db();
 
     $check = $pdo->prepare(
-        'SELECT h_sheet_name, h_plan_name FROM ' . HALL_TABLE . ' WHERE h_id = ?'
+        'SELECT h_key, h_sheet_name, h_plan_name FROM ' . HALL_TABLE . ' WHERE h_id = ?'
     );
     $check->execute([(int) $hallId]);
     $current = $check->fetch();
@@ -694,6 +701,12 @@ function hall_update($hallId, array $input, $sheet, $plan, array $photos, array 
         $stmt->execute($params);
 
         $pdo->commit();
+
+        // 영문 (기계 번역) — 한국어를 고쳤으면 지문이 달라져 다시 번역됩니다.
+        translation_ensure('hall', (string) $current['h_key'], [
+            'name' => (string) $input['name'],
+            'spec' => (string) $input['spec'],
+        ]);
     } catch (Throwable $e) {
         $pdo->rollBack();
 

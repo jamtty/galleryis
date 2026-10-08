@@ -20,6 +20,7 @@ declare(strict_types=1);
 require_once __DIR__ . '/db.php';
 require_once __DIR__ . '/html.php';
 require_once __DIR__ . '/response.php';
+require_once __DIR__ . '/translation.php';
 
 const SETTING_TABLE = 'site_setting';
 
@@ -251,6 +252,13 @@ function setting_public_values()
         $out[$key] = isset($values[$key]) ? $values[$key] : '';
     }
 
+    // 영문 본문 (기계 번역) — 개인정보처리방침은 원문이 관리자 글이라
+    // 영문 화면에서도 번역본을 함께 내려 줍니다. (없으면 빈 값)
+    if (array_key_exists('page_privacy_html', $out)) {
+        $en = translation_texts('setting', 'page_privacy_html');
+        $out['page_privacy_html_en'] = isset($en['html']) ? $en['html'] : '';
+    }
+
     return $out;
 }
 
@@ -387,6 +395,14 @@ function setting_update(array $input, $adminId = '')
         }
 
         throw $e;
+    }
+
+    // 영문 (기계 번역) — 방침 본문은 길어서 저장 직후 한 번만 번역해 둡니다.
+    // 한국어를 고치면 지문이 달라져 다음 저장 때 다시 번역됩니다.
+    if (array_key_exists('page_privacy_html', $saved)) {
+        translation_ensure('setting', 'page_privacy_html', [
+            'html' => (string) $saved['page_privacy_html'],
+        ]);
     }
 
     return $saved;

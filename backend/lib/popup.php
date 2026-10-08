@@ -14,6 +14,7 @@ require_once __DIR__ . '/db.php';
 require_once __DIR__ . '/response.php';
 require_once __DIR__ . '/upload.php';
 require_once __DIR__ . '/html.php';
+require_once __DIR__ . '/translation.php';
 
 const POPUP_TABLE = 'popup_banner';
 
@@ -276,10 +277,14 @@ function popup_remove_image($saveName)
 function popup_out(array $row)
 {
     $saveName = isset($row['img_save_name']) ? (string) $row['img_save_name'] : '';
+    // 영문 제목 (기계 번역) — 원본 첫 화면의 팝업은 제목을 쓰지 않고
+    // 이미지가 글자를 들고 있지만, 화면 낭독기에는 이 제목이 읽힙니다.
+    $en = translation_texts('popup', (int) $row['id']);
 
     return [
         'id' => (int) $row['id'],
         'title' => (string) $row['admin_title'],
+        'titleEn' => isset($en['title']) ? $en['title'] : '',
         'url' => (string) $row['url'],
         'linkTarget' => (string) $row['link_target'],
         'periodStart' => isset($row['period_start']) && $row['period_start'] !== null
@@ -475,6 +480,9 @@ function popup_create(array $input, $image, $adminId)
 
         $pdo->commit();
 
+        // 영문 제목 (기계 번역)
+        translation_ensure('popup', $id, ['title' => (string) $input['title']]);
+
         return $id;
     } catch (Throwable $e) {
         $pdo->rollBack();
@@ -562,6 +570,9 @@ function popup_update($id, array $input, $image, $adminId)
     if ($stored !== null && $oldSave !== '' && $oldSave !== $stored['save']) {
         popup_remove_image($oldSave);
     }
+
+    // 영문 제목 (기계 번역) — 제목을 고쳤으면 다시 번역됩니다.
+    translation_ensure('popup', $id, ['title' => (string) $input['title']]);
 }
 
 /**
@@ -602,6 +613,9 @@ function popup_delete($id)
     }
 
     db()->prepare('DELETE FROM ' . POPUP_TABLE . ' WHERE id = ?')->execute([(int) $id]);
+
+    // 팝업을 지우면 그 영문 제목도 함께 지웁니다.
+    translation_forget('popup', (int) $id);
 
     return ['deleted' => true, 'files' => popup_remove_image((string) $row['img_save_name'])];
 }

@@ -2,7 +2,7 @@ import { motion } from "framer-motion";
 import type { ExhibitionSummary } from "@galleryis/shared";
 import { useTranslation } from "react-i18next";
 import { Link } from "react-router";
-import { hallLabel, showTitle, useExhibitions } from "../lib/exhibition";
+import { hallLabel, showLang, showTitle, useExhibitions } from "../lib/exhibition";
 import { PosterGridSkeleton } from "./Skeleton";
 
 // The poster card and the grid around it, shared by the front page's two
@@ -17,10 +17,10 @@ export function ExhibitionCard({
   exhibition: ExhibitionSummary;
   index: number;
 }) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const image = exhibition.images?.[0];
-  const title = showTitle(exhibition);
-  const hall = hallLabel(exhibition, t);
+  const title = showTitle(exhibition, i18n.language);
+  const hall = hallLabel(exhibition, t, i18n.language);
   return (
     <article
       className="animate-rise"
@@ -54,10 +54,11 @@ export function ExhibitionCard({
           )}
         </motion.div>
         <div className="mt-5">
-          {/* The show's own name, Korean in both locales — see showTitle.
-              `lang` so a screen reader on the English page switches voice. */}
+          {/* The show's own name — Korean under KO, the machine translation
+              under EN (see showTitle). `lang` keeps a screen reader's voice
+              right either way. */}
           <h3
-            lang="ko"
+            lang={showLang(i18n.language, exhibition.title_en)}
             className="font-display text-lg leading-snug font-bold break-keep decoration-1 underline-offset-4 group-hover:underline"
           >
             {title}

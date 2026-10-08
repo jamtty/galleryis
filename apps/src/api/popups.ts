@@ -52,6 +52,8 @@ export type PopupInput = {
 export type PopupItem = {
   id: number
   title: string
+  /** 영문 제목 (기계 번역 · 없으면 빈 문자열) */
+  titleEn?: string
   url: string
   linkTarget: string
   /** YYYY-MM-DD (없으면 빈 문자열) */
@@ -102,7 +104,17 @@ export function fetchPopupDetail(id: number) {
 /** 공개 사이트에 띄울 팝업 (인증 없음) */
 export type ActivePopup = Pick<
   PopupItem,
-  'id' | 'title' | 'url' | 'linkTarget' | 'posLeft' | 'posTop' | 'imageUrl' | 'width' | 'height'
+  | 'id'
+  | 'title'
+  // 영문 제목 (기계 번역) — 화면 낭독기가 읽는 이름이라 함께 받습니다.
+  | 'titleEn'
+  | 'url'
+  | 'linkTarget'
+  | 'posLeft'
+  | 'posTop'
+  | 'imageUrl'
+  | 'width'
+  | 'height'
 >
 
 export function fetchActivePopups() {

@@ -78,10 +78,14 @@ export type HallItem = {
   /** hall1 ~ hall4 */
   key: string
   name: string
+  /** 영문 전시장명 (기계 번역 · 없으면 빈 문자열) */
+  nameEn?: string
   /** 층 (1F · 2F · 3F · B1) */
   floor: string
   /** 규모 (181m² · 55평 (공유면적 포함) · 층고 280cm) */
   spec: string
+  /** 영문 규모 문장 (기계 번역 · 없으면 빈 문자열) */
+  specEn?: string
   pricePeak: number
   monthPeak: string
   priceOff: number

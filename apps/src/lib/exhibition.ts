@@ -12,6 +12,25 @@ export function useExhibitions(status: "current" | "upcoming" | "past") {
 }
 
 /**
+ * 헤더 검색의 결과 — 전시 목록 페이지가 그리는 목록 (`/exhibitions?keyword=…`).
+ *
+ * 분류 탭의 세 목록과 달리 **현재·예정·지난을 한 번에** 훑습니다: 어느 탭에도
+ * 없는 지난 전시를 찾는 것이 검색의 일이고, 서버가 검색일 때만 최신순으로
+ * 돌려줍니다. 빈 검색어로는 묻지 않습니다 (`enabled`) — 빈 검색어는 "전부" 가
+ * 아니라 아무것도 아닙니다.
+ */
+export function useExhibitionSearch(keyword: string) {
+  return useQuery({
+    queryKey: ["exhibitions", "search", keyword],
+    queryFn: () =>
+      fetchJson<ExhibitionSummary[]>(
+        `/api/exhibitions?keyword=${encodeURIComponent(keyword)}`,
+      ),
+    enabled: keyword !== "",
+  });
+}
+
+/**
  * The i18n key for a hall's display name. Hall ids on the wire are
  * hall1..hall4 (§5); the cast tells the typed t() so, since a runtime string
  * cannot carry that knowledge on its own.
@@ -28,42 +47,56 @@ export function hallNameKey(hallId: string) {
  * own words verbatim, which beats saying nothing. Null when neither exists.
  */
 export function hallLabel(
-  exhibition: Pick<ExhibitionSummary, "hall_id" | "hall_text">,
+  exhibition: Pick<
+    ExhibitionSummary,
+    "hall_id" | "hall_text" | "hall_text_en"
+  >,
   t: TFunction,
+  language: string,
 ): string | null {
   if (exhibition.hall_id) return t(hallNameKey(exhibition.hall_id));
+  // 관리자가 적은 전시장소 — 영문 화면에서는 그 번역문을 씁니다.
+  if (language.startsWith("en") && exhibition.hall_text_en) {
+    return exhibition.hall_text_en;
+  }
   return exhibition.hall_text || null;
 }
 
 /**
- * A show's name, and its artist's, in Korean — in both locales.
+ * A show's name, and its artist's — in the visitor's own language.
  *
- * These two fields are names, not prose. 봄놀다 2026 展 is a coined word and
- * "Spring Play 2026 Exhibition" is a guess at what it might mean; 김 도 희 is
- * a person, and "Kim Do-hee" is a spelling of that name rather than the name
- * the gallery filed. Everything else about a show — the overview, the 약력,
- * when it runs and where it hangs — reads in the visitor's own language.
+ * 2026-10-08 바뀐 정책: 예전에는 두 값을 **양쪽 로케일 모두 한국어로** 그렸습니다
+ * (`title_en` 은 원본 동기화에서 오는 기계 번역이라 이름을 지어내는 셈이라고 봤습니다).
+ * 갤러리 요청에 따라 영문 화면에서는 영문을 그립니다 — 다만 그것이 기계 번역이라는
+ * 사실을 화면이 밝힙니다 (`exhibition.machine`).
  *
- * `title_en` and `artist_en` keep arriving from the sync and stay on the wire
- * and in Firestore. They are simply not what this site prints, so the day the
- * gallery supplies an English name it has written itself, these two functions
- * are the only place that changes.
- *
- * Whatever the page's locale the text they return is Korean, so every element
- * that renders one carries `lang="ko"`: on the English page a screen reader
- * has to switch voice for it rather than read 봄놀다 out as Latin letters.
+ * 영문이 없으면 (번역 전이거나 키가 없을 때) 한국어로 되돌아갑니다.
+ * 그래서 돌려주는 글의 언어를 `showLang()` 으로 물어 `lang` 속성에 적어야 합니다 —
+ * 영문 화면의 한국어 이름은 화면 낭독기가 목소리를 바꿔서 읽어야 합니다.
  */
 export function showTitle(
-  exhibition: Pick<ExhibitionSummary, "title_ko">,
+  exhibition: Pick<ExhibitionSummary, "title_ko" | "title_en">,
+  language: string,
 ): string {
+  if (language.startsWith("en") && exhibition.title_en) return exhibition.title_en;
   return exhibition.title_ko;
 }
 
 /** The artist as the gallery filed them. See {@link showTitle}. */
 export function showArtist(
-  exhibition: Pick<ExhibitionSummary, "artist_ko">,
+  exhibition: Pick<ExhibitionSummary, "artist_ko" | "artist_en">,
+  language: string,
 ): string | null {
+  if (language.startsWith("en") && exhibition.artist_en) return exhibition.artist_en;
   return exhibition.artist_ko;
+}
+
+/** showTitle()·showArtist() 가 그린 글의 언어 — 그대로 `lang` 속성에 씁니다. */
+export function showLang(
+  language: string,
+  english: string | null | undefined,
+): string {
+  return language.startsWith("en") && english ? "en" : "ko";
 }
 
 /**

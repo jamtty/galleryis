@@ -92,7 +92,7 @@
 
 /* The numerals: Pretendard, and only what a number is made of. `unicode-range`
    narrows the face to the ten digits and the marks that sit between them — the
-   comma of ₩ 5,500,000, the dots of 2026.08.05, the tilde of a week's range,
+   comma of ₩ 5,500,000, the dots of 2026.08.05, the tilde of 오후 2시~7시,
    the hyphens of 02-736-6669, the colon of 10:00, the + of +82, the % of 30%,
    and the ₩ itself. Every letter, Hangul or Latin, still falls through to Noto
    Sans KR. The range was the digits alone until 2026-08-29, which left a Noto

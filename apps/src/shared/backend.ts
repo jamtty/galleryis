@@ -21,6 +21,7 @@ import {
 } from '@/api/notices'
 import { fetchActivePopups } from '@/api/popups'
 import { packRentalMemo } from '@/lib/rentalMemo'
+import { formatDotDate } from '@/utils/date'
 import { HALL_PLANS } from './hallPlans'
 import {
   createBooking,
@@ -157,8 +158,13 @@ async function dispatchGet(url: string): Promise<unknown> {
   switch (path) {
     case '/api/exhibitions': {
       const status = query.get('status') ?? 'current'
+      // 검색어가 있으면 현재·예정·지난 전시를 한 번에 훑습니다 (헤더 검색).
+      // 탭 목록은 세 분류를 따로 캐시하므로, 검색은 그 캐시를 쓰지 않습니다.
+      const keyword = (query.get('keyword') ?? '').trim()
+
       const res = await fetchPublicExhibitionList({
-        status,
+        status: keyword ? '' : status,
+        keyword,
         page: 1,
         size: LIST_SIZE,
       })
@@ -240,17 +246,20 @@ function toExhibitionSummary(item: PublicExhibitionItem): ExhibitionSummary {
     id: String(item.id),
     status: item.status as ExhibitionSummary['status'],
     title_ko: decodeEntities(item.title),
-    // 우리 백엔드는 영문 제목을 따로 두지 않습니다. (화면은 한국어를 씁니다)
-    title_en: null,
+    // 영문은 관리자가 쓴 한국어를 번역 서비스로 옮긴 값입니다. (없으면 빈 값)
+    title_en: item.titleEn ? decodeEntities(item.titleEn) : null,
     artist_ko: item.artist ? decodeEntities(item.artist) : null,
-    artist_en: null,
+    artist_en: item.artistEn ? decodeEntities(item.artistEn) : null,
     // 목록에는 전시개요가 없습니다. (원본도 목록에서는 쓰지 않습니다)
     overview_ko: null,
     overview_en: null,
-    translation: 'missing',
+    // 영문이 하나라도 있으면 'machine' — 화면이 "기계 번역" 안내를 껐다 켭니다.
+    translation: item.translation === 'machine' ? 'machine' : 'missing',
     // 전시장소는 관리자가 적은 글을 그대로 보여 줍니다.
     hall_id: null,
     hall_text: item.place ? decodeEntities(item.place) : null,
+    // 영문 전시장소 (기계 번역) — 영문 화면은 `hallLabel()` 이 이 값을 씁니다.
+    hall_text_en: item.placeEn ? decodeEntities(item.placeEn) : null,
     period_text: periodText(item.startDate, item.endDate),
     start_date: item.startDate || null,
     end_date: item.endDate || null,
@@ -265,24 +274,25 @@ function toExhibitionDetail(
 
   return {
     ...toExhibitionSummary(detail),
-    // 전시개요·약력은 관리자 에디터가 쓴 HTML 입니다.
+    // 전시개요·약력은 관리자 에디터가 쓴 HTML 입니다. 영문도 같은 모양(HTML)으로
+    // 번역해 두었으므로 있으면 그쪽을 그립니다.
     overview_html_ko: detail.overview || null,
     overview_en: null,
-    overview_html_en: null,
+    overview_html_en: detail.overviewEn || null,
     bio_ko: null,
     bio_html_ko: detail.bio || null,
     bio_en: null,
-    bio_html_en: null,
+    bio_html_en: detail.bioEn || null,
     images: images.length > 0 ? images : detail.imageUrl ? [detail.imageUrl] : null,
   }
 }
 
-/** "2026.08.05 ~ 09.30" — 원본이 카드에 쓰는 모양 */
+/** "2026.08.05 - 2026.09.30" — 카드에 쓰는 기간 (구분자는 `-` · 양쪽 연도 표시) */
 function periodText(start: string, end: string): string | null {
   if (!start && !end) return null
 
   const dot = (value: string) => value.replaceAll('-', '.')
-  if (start && end) return `${dot(start)} ~ ${dot(end)}`
+  if (start && end) return `${dot(start)} - ${dot(end)}`
 
   return dot(start || end)
 }
@@ -298,12 +308,15 @@ function toNoticeSummary(item: PublicNoticeItem): SiteNoticeSummary {
   return {
     id: String(item.id),
     title_ko: decodeEntities(item.title),
-    title_en: null,
+    title_en: item.titleEn ? decodeEntities(item.titleEn) : null,
     body_ko: null,
     body_en: null,
-    translation: 'missing',
+    translation: item.translation === 'machine' ? 'machine' : 'missing',
     pinned: item.pinned,
-    published_at: item.createdAt,
+    // 등록일만 싣고 시간은 빼습니다 (2026-10-02 사용자 지시). DB 의
+    // `wr_datetime` 은 `2026-09-30 14:23:11` 이고, 원본은 이 자리에 그
+    // 문자열을 그대로 그렸습니다. 화면에는 `2026.09.30` 으로 나갑니다.
+    published_at: formatDotDate(item.createdAt),
     views: item.hit,
     attachments: null,
     images: null,
@@ -321,6 +334,8 @@ function toNoticeDetail(
     ...toNoticeSummary({
       id: detail.id,
       title: detail.title,
+      // ⚠ 영문 제목을 빠뜨리면 상세 화면만 한국어로 남습니다 (목록은 영문).
+      titleEn: detail.titleEn,
       pinned: detail.pinned,
       author: detail.author,
       hit: detail.hit,
@@ -331,6 +346,9 @@ function toNoticeDetail(
     // 본문은 에디터가 쓴 HTML 이거나 옛 평문입니다. (RichText 가 판단합니다)
     // 옛 본문의 `&#65517;` 같은 엔티티는 여기서 글자로 되돌립니다.
     body_ko: detail.content ? decodeEntities(detail.content) : null,
+    // 영문 본문 (기계 번역) — 없으면 null 이고 화면은 한국어를 그립니다.
+    body_en: detail.bodyEn ? decodeEntities(detail.bodyEn) : null,
+    translation: detail.translation === 'machine' ? 'machine' : 'missing',
     attachments: detail.files.map((file) => ({
       url: file.url,
       filename: decodeEntities(file.name),
@@ -352,7 +370,11 @@ function toHall(hall: HallItem): SiteHall {
     id: hall.key,
     floor: hall.floor,
     name_ko: hall.name,
-    name_en: hall.name,
+    // 영문 이름 (기계 번역) — 없으면 한국어 이름 그대로
+    name_en: hall.nameEn || hall.name,
+    // 규모는 관리자가 쓴 문장을 그대로 (영문 화면은 번역문)
+    spec_ko: hall.spec,
+    spec_en: hall.specEn || null,
     area_m2: area || 0,
     pyeong: pyeong || 0,
     ceiling_cm: ceiling || 0,
@@ -406,7 +428,7 @@ async function toPopup(): Promise<PopupResponse> {
     popup: {
       id: String(first.id),
       title_ko: first.title,
-      title_en: null,
+      title_en: first.titleEn || null,
       image_url: first.imageUrl,
       link_url: first.url || null,
       updated_at: null,

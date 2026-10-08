@@ -37,6 +37,14 @@ export interface ExhibitionSummary {
   /** The gallery's own 전시장소 words — "제 1, 2 전시장 (1F, 2F)" for a show
    *  across two floors, which has no single hall_id. */
   hall_text: string | null;
+  /**
+   * `hall_text` 의 기계 번역 (없으면 null).
+   *
+   * 전시장소는 관리자가 자유롭게 적는 칸이라(`제 1, 2 전시장 (1F, 2F)`) 하나의
+   * `hall_id` 로 정리되지 않습니다. 그래서 영문 화면은 이 번역문을 씁니다
+   * (`lib/exhibition.ts` 의 `hallLabel`).
+   */
+  hall_text_en?: string | null;
   period_text: string | null;
   start_date: string | null;
   end_date: string | null;
@@ -394,6 +402,19 @@ export interface Hall {
   floor: string; // "1F" | "2F" | "3F" | "B1"
   name_ko: string;
   name_en: string;
+  /**
+   * 관리자가 쓴 규모 문장 — `"181m² · 55평 (공유면적 포함) · 층고 280cm"`.
+   *
+   * 원본 타입에는 없던 값입니다. 원본은 숫자 3개(`area_m2` · `pyeong` ·
+   * `ceiling_cm`)만 받아 화면이 문구를 만들었는데, 그러면 관리자가 규모 칸에
+   * 쓴 다른 말(`(공유면적 포함)` 뒤에 덧붙인 말 등)이 사라집니다.
+   * 이제는 이 문장을 그대로 보여 주고, 영문 화면에서는 그 번역을 씁니다
+   * (`pick(hall, "spec", lang)`). 숫자 3개는 문장이 비었을 때의 기본값과
+   * 3D 둘러보기의 층고로 계속 쓰입니다.
+   */
+  spec_ko?: string;
+  /** `spec_ko` 의 기계 번역 (없으면 null) */
+  spec_en?: string | null;
   area_m2: number;
   pyeong: number;
   ceiling_cm: number;

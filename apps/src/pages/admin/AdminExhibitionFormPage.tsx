@@ -334,7 +334,7 @@ export default function AdminExhibitionFormPage() {
                 variant="form"
                 disabled={saving}
               />
-              <span>~</span>
+              <span>-</span>
               <DatePicker
                 value={endDate}
                 onChange={setEndDate}

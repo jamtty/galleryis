@@ -13,6 +13,9 @@ import { apiRequest } from './client'
 /** 공개 사이트에서 쓰는 설정 키 (설정 키 → 화면에서 쓰는 이름) */
 export const SETTING_KEYS = {
   pagePrivacyHtml: 'page_privacy_html',
+  // 영문 본문 (기계 번역) — 한국어 원문을 번역해 둔 값입니다.
+  // 서버가 설정 표가 아니라 번역 표(translation)에서 함께 내려 줍니다.
+  pagePrivacyHtmlEn: 'page_privacy_html_en',
 } as const
 
 export type SiteSettings = Record<keyof typeof SETTING_KEYS, string>
@@ -23,6 +26,7 @@ export type SiteSettings = Record<keyof typeof SETTING_KEYS, string>
  */
 export const DEFAULT_SETTINGS: SiteSettings = {
   pagePrivacyHtml: '',
+  pagePrivacyHtmlEn: '',
 }
 
 /** 공개 설정값 (인증 없음) — { 설정키: 값 } */

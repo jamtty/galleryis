@@ -14,6 +14,7 @@ require_once __DIR__ . '/db.php';
 require_once __DIR__ . '/response.php';
 require_once __DIR__ . '/upload.php';
 require_once __DIR__ . '/html.php';
+require_once __DIR__ . '/translation.php';
 
 const EXHIBITION_TABLE = 'exhibition';
 const EXHIBITION_FILE_TABLE = 'exhibition_file';
@@ -499,6 +500,16 @@ function exhibition_create(array $input, array $files, $adminId)
 
         $pdo->commit();
 
+        // 영문 (기계 번역) — 실패해도 등록은 끝난 것으로 봅니다.
+        // (번역은 언제든 관리자 [영문 번역]에서 다시 만들 수 있습니다)
+        translation_ensure('exhibition', $exId, [
+            'title' => (string) $input['title'],
+            'artist' => (string) $input['artist'],
+            'place' => (string) $input['place'],
+            'overview' => (string) $input['overview'],
+            'bio' => (string) $input['bio'],
+        ]);
+
         return $exId;
     } catch (Throwable $e) {
         $pdo->rollBack();
@@ -844,6 +855,9 @@ function exhibition_delete($exId)
         }
     }
 
+    // 전시를 지우면 그 영문도 함께 지웁니다.
+    translation_forget('exhibition', $exId);
+
     return ['files' => $removed, 'post' => $post];
 }
 
@@ -920,6 +934,15 @@ function exhibition_update($exId, array $input)
     $params[] = (int) $exId;
 
     db()->prepare($sql)->execute($params);
+
+    // 영문 (기계 번역) — 한국어를 고쳤으면 지문이 달라져 다시 번역됩니다.
+    translation_ensure('exhibition', $exId, [
+        'title' => (string) $input['title'],
+        'artist' => (string) $input['artist'],
+        'place' => (string) $input['place'],
+        'overview' => (string) $input['overview'],
+        'bio' => (string) $input['bio'],
+    ]);
 }
 
 /**
@@ -975,12 +998,20 @@ function exhibition_public_item(array $row)
 {
     $status = isset($row['ex_status']) ? (string) $row['ex_status'] : '';
     $thumb = isset($row['thumb_name']) ? (string) $row['thumb_name'] : '';
+    // 영문 (기계 번역 · backend/lib/translation.php) — 없으면 빈 값입니다.
+    $en = translation_texts('exhibition', (int) $row['ex_id']);
 
     return [
         'id' => (int) $row['ex_id'],
         'title' => (string) $row['ex_title'],
+        'titleEn' => isset($en['title']) ? $en['title'] : '',
         'artist' => (string) $row['ex_artist'],
+        'artistEn' => isset($en['artist']) ? $en['artist'] : '',
+        // 영문이 하나라도 있으면 화면이 "기계 번역" 안내를 띄웁니다.
+        'translation' => $en === [] ? 'missing' : 'machine',
         'place' => (string) $row['ex_place'],
+        // 영문 전시장소 (기계 번역 · 없으면 빈 값 → 화면은 한국어를 씁니다)
+        'placeEn' => isset($en['place']) ? $en['place'] : '',
         'startDate' => (string) $row['ex_start_date'],
         'endDate' => (string) $row['ex_end_date'],
         'status' => $status,
@@ -995,7 +1026,7 @@ function exhibition_public_item(array $row)
  *
  * 노출(Y) 중인 전시만 골라 카드에 쓸 대표 이미지(첫 작품 이미지)와 함께 돌려줍니다.
  *
- * @param array $query status(current|upcoming|past) · page · size
+ * @param array $query status(current|upcoming|past) · keyword · page · size
  * @return array{items: array, totalCount: int, totalPages: int, page: int, size: int}
  */
 function exhibition_public_list(array $query)
@@ -1008,6 +1039,7 @@ function exhibition_public_list(array $query)
     $page = isset($query['page']) ? max(1, (int) $query['page']) : 1;
     $size = isset($query['size']) ? min(48, max(1, (int) $query['size'])) : 12;
     $status = isset($query['status']) ? trim((string) $query['status']) : '';
+    $keyword = isset($query['keyword']) ? trim((string) $query['keyword']) : '';
 
     // 분류 컴럼은 마이그레이션 전일 수 있으므로 있을 때만 쿼리에 넣습니다.
     $hasStatus = exhibition_has_column('ex_status');
@@ -1015,14 +1047,29 @@ function exhibition_public_list(array $query)
     $where = ["ex_use_yn = 'Y'"];
     $params = [];
 
+    // 검색 — 전시회명 · 전시장소 · 작가명 (관리자 목록과 같은 조건, 2026-10-02).
+    // 공개 검색은 상태를 가리지 않고 훑기 때문에 분류 조건보다 앞에 둡니다.
+    if ($keyword !== '') {
+        $where[] = '(ex_title LIKE ? OR ex_place LIKE ? OR ex_artist LIKE ?)';
+        $like = '%' . $keyword . '%';
+        $params[] = $like;
+        $params[] = $like;
+        $params[] = $like;
+    }
+
     if ($hasStatus && isset(EXHIBITION_STATUSES[$status])) {
         $where[] = 'ex_status = ?';
         $params[] = $status;
     }
 
-    // 정렬 — 모든 탭이 시작일 오름차순(먼저 연 전시부터). 2026-09-19 에 뒤집었습니다.
+    // 정렬 — 탭은 시작일 오름차순(먼저 연 전시부터). 2026-09-19 에 뒤집었습니다.
     // 관리자 목록(exhibition_list)도 같은 순서(ex_id ASC)로 맞춰 두었습니다.
-    $orderSql = 'ex_start_date ASC, ex_id ASC';
+    //
+    // 검색만 최근 전시부터 (2026-10-02): 헤더 검색은 결과를 한 화면(10건)만
+    // 보여 주는데, 오름차순이면 48건 밖으로 밀려난 최근 전시가 아예 안 보입니다.
+    $orderSql = $keyword !== ''
+        ? 'ex_start_date DESC, ex_id DESC'
+        : 'ex_start_date ASC, ex_id ASC';
 
     $whereSql = implode(' AND ', $where);
 
@@ -1078,18 +1125,26 @@ function exhibition_public_detail($exId)
     }
 
     $status = isset($row['ex_status']) ? (string) $row['ex_status'] : '';
+    $en = translation_texts('exhibition', (int) $row['ex_id']);
 
     return [
         'id' => (int) $row['ex_id'],
         'title' => (string) $row['ex_title'],
+        'titleEn' => isset($en['title']) ? $en['title'] : '',
         'status' => $status,
         'statusLabel' => isset(EXHIBITION_STATUSES[$status]) ? EXHIBITION_STATUSES[$status] : '',
         'place' => (string) $row['ex_place'],
+        // 영문 전시장소 (기계 번역 · 없으면 빈 값 → 화면은 한국어를 씁니다)
+        'placeEn' => isset($en['place']) ? $en['place'] : '',
         'artist' => (string) $row['ex_artist'],
+        'artistEn' => isset($en['artist']) ? $en['artist'] : '',
         'startDate' => (string) $row['ex_start_date'],
         'endDate' => (string) $row['ex_end_date'],
         'overview' => (string) $row['ex_overview'],
+        'overviewEn' => isset($en['overview']) ? $en['overview'] : '',
         'bio' => (string) $row['ex_bio'],
+        'bioEn' => isset($en['bio']) ? $en['bio'] : '',
+        'translation' => $en === [] ? 'missing' : 'machine',
         'hit' => (int) $row['ex_hit'],
         'files' => exhibition_files_for($exId),
     ];

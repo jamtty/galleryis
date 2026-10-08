@@ -100,14 +100,11 @@ function pageRange(pageIndex: number): {
   };
 }
 
-/** "2026.08.05, 08.11", the period as the gallery writes it. */
+/** "2026.08.05 - 2026.08.11", the period as the gallery writes it. */
 function periodLabel(week: AvailabilityWeek): string {
-  const [, sm, sd] = week.start.split("-");
+  const [sy, sm, sd] = week.start.split("-");
   const [ey, em, ed] = week.end.split("-");
-  const [sy] = week.start.split("-");
-  return sy === ey
-    ? `${sy}.${sm}.${sd} ~ ${em}.${ed}`
-    : `${sy}.${sm}.${sd} ~ ${ey}.${em}.${ed}`;
+  return `${sy}.${sm}.${sd} - ${ey}.${em}.${ed}`;
 }
 
 /**

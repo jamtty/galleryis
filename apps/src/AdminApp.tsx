@@ -16,6 +16,7 @@ import AdminRentalEditPage from '@/pages/admin/AdminRentalEditPage'
 import AdminRentalRequestPage from '@/pages/admin/AdminRentalRequestPage'
 import AdminRentalSchedulePage from '@/pages/admin/AdminRentalSchedulePage'
 import AdminSettingPage from '@/pages/admin/AdminSettingPage'
+import AdminTranslatePage from '@/pages/admin/AdminTranslatePage'
 import { PATHS } from '@/routes/paths'
 
 /**
@@ -60,6 +61,7 @@ export default function AdminApp() {
           <Route path="popups/write" element={<AdminPopupFormPage />} />
           <Route path="popups/edit/:id" element={<AdminPopupFormPage />} />
           <Route path="settings" element={<AdminSettingPage />} />
+          <Route path="translate" element={<AdminTranslatePage />} />
           <Route path="mypage" element={<AdminMyPage />} />
           <Route path="*" element={<Navigate to={PATHS.adminRentals} replace />} />
         </Route>

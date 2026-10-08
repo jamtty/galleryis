@@ -145,7 +145,35 @@ export function configureLayoutStore(store: LayoutStore): void {
  */
 let epoch = 0;
 
-const newSessionId = () => crypto.randomUUID();
+/**
+ * A UUID for a session or a hung work.
+ *
+ * `crypto.randomUUID()` is defined **only in a secure context**, and the studio
+ * is served over plain http in production (`http://www.galleryis.com/…`), where
+ * it is `undefined` — hydration threw on the first read and the panel sat on
+ * "저장된 배치를 불러오는 중…" forever (localhost counts as secure, so it never
+ * showed while developing). The fallback covers that: these ids only have to
+ * keep one device's works and sessions apart, never to be unforgeable.
+ */
+const randomUuid = (): string => {
+  const webCrypto: Crypto | undefined = globalThis.crypto;
+  if (typeof webCrypto?.randomUUID === "function") {
+    return webCrypto.randomUUID();
+  }
+  const bytes = new Uint8Array(16);
+  if (typeof webCrypto?.getRandomValues === "function") {
+    webCrypto.getRandomValues(bytes);
+  } else {
+    for (let i = 0; i < bytes.length; i += 1) {
+      bytes[i] = Math.floor(Math.random() * 256);
+    }
+  }
+  // Version 4 / variant 10, the shape `randomUUID` returns.
+  bytes[6] = (bytes[6] & 0x0f) | 0x40;
+  bytes[8] = (bytes[8] & 0x3f) | 0x80;
+  const hex = Array.from(bytes, (b) => b.toString(16).padStart(2, "0")).join("");
+  return `${hex.slice(0, 8)}-${hex.slice(8, 12)}-${hex.slice(12, 16)}-${hex.slice(16, 20)}-${hex.slice(20)}`;
+};
 
 /** Review-mode works have no objectURL to release. */
 const revoke = (url: string | null) => {
@@ -222,6 +250,22 @@ export const useWorksStore = create<WorksState>((set, get) => {
    * hang is worse than admitting it moved.
    */
   const hydrate = async (context: HallContext, myEpoch: number) => {
+    // Whatever goes wrong in there, the panel must not stay on "저장된 배치를
+    // 불러오는 중…" — an empty hall the visitor can fill beats a line that
+    // never clears.
+    try {
+      await readBack(context, myEpoch);
+    } catch {
+      if (myEpoch === epoch) {
+        set({
+          hydrating: false,
+          persistence: layoutStore.available ? "on" : "off",
+        });
+      }
+    }
+  };
+
+  const readBack = async (context: HallContext, myEpoch: number) => {
     const stale = () => myEpoch !== epoch;
     let record: LayoutRecord | null = null;
     try {
@@ -257,7 +301,7 @@ export const useWorksStore = create<WorksState>((set, get) => {
     };
 
     if (!record || record.schema !== SCHEMA) {
-      finish([], false, record?.sessionId ?? newSessionId(), null);
+      finish([], false, record?.sessionId ?? randomUuid(), null);
       return;
     }
 
@@ -446,7 +490,7 @@ export const useWorksStore = create<WorksState>((set, get) => {
           report(file.name, "unreadable");
           continue;
         }
-        const id = crypto.randomUUID();
+        const id = randomUuid();
         // Queued *before* the state change, so the layout write the change
         // triggers waits on it. Written once, here, the debounced layout
         // writer only rewrites the small placement record, never the megabytes.
@@ -628,7 +672,7 @@ export const useWorksStore = create<WorksState>((set, get) => {
         draggingId: null,
         manualLayout: false,
         restoreNote: null,
-        sessionId: newSessionId(),
+        sessionId: randomUuid(),
       });
     },
   };

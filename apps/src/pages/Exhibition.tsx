@@ -20,6 +20,7 @@ import {
   hallLabel,
   paragraphs,
   showArtist,
+  showLang,
   showTitle,
 } from "../lib/exhibition";
 import { useDocumentTitle } from "../lib/useDocumentTitle";
@@ -58,7 +59,7 @@ export default function ExhibitionPage() {
   const [open, setOpen] = useState<number | null>(null);
 
   const show = query.data;
-  const title = show ? showTitle(show) : null;
+  const title = show ? showTitle(show, i18n.language) : null;
   useDocumentTitle(title, t("brand.name"));
 
   const back = (
@@ -101,8 +102,8 @@ export default function ExhibitionPage() {
   }
 
   const exhibition = show!;
-  const artist = showArtist(exhibition);
-  const hall = hallLabel(exhibition, t);
+  const artist = showArtist(exhibition, i18n.language);
+  const hall = hallLabel(exhibition, t, i18n.language);
   // A post written on the desk carries its 전시개요 and 약력 as rich text,
   // sanitised by the API, and that is what it wants printed; a mirrored post
   // has only the plain text, read the way the origin's shape asks for.
@@ -149,11 +150,11 @@ export default function ExhibitionPage() {
               </div>
             )}
             <header>
-              {/* The show's own name, Korean in both locales — see showTitle.
-                  `lang` so a screen reader on the English page switches
-                  voice. */}
+              {/* The show's own name — Korean under KO, the machine translation
+                  under EN (see showTitle). `lang` so a screen reader switches
+                  voice when the gallery's Korean name is printed instead. */}
               <h1
-                lang="ko"
+                lang={showLang(i18n.language, exhibition.title_en)}
                 className="font-display text-title font-bold break-keep"
               >
                 {title}
@@ -167,7 +168,9 @@ export default function ExhibitionPage() {
               <dl className="mt-5 border-t-2 border-ink">
                 {artist && (
                   <DefRow label={t("exhibition.artist")}>
-                    <span lang="ko">{artist}</span>
+                    <span lang={showLang(i18n.language, exhibition.artist_en)}>
+                      {artist}
+                    </span>
                   </DefRow>
                 )}
                 {exhibition.period_text && (

@@ -1,5 +1,7 @@
 import { Suspense, lazy } from 'react'
+import { useTranslation } from 'react-i18next'
 import { Route, Routes } from 'react-router'
+import Loader from '@/studio/components/Loader'
 import { createLayoutStore } from '@/studio/lib/layoutStore'
 import { configureLayoutStore } from '@/studio/store/works'
 
@@ -13,17 +15,22 @@ import { configureLayoutStore } from '@/studio/store/works'
  * 라우트는 여기서 한 번 더 걸어 둡니다 — HallView 가 `useParams()` 로 전시장
  * 키를 읽기 때문에, 그냥 그리면 키가 비어 "전시장 정보를 불러오지 못했습니다"
  * 로 끝납니다.
+ *
+ * 폴백은 글자 대신 스튜디오와 같은 로딩 마크입니다 (2026-10-02): 3D 묶음을
+ * 받는 동안 정지된 문장이 먼저 보이면, 기다림이 시작되지 않은 것처럼 읽힙니다.
  */
 configureLayoutStore(createLayoutStore())
 
 const HallView = lazy(() => import('@/studio/pages/HallView'))
 
 export default function HallStudioRoute() {
+  const { t } = useTranslation()
+
   return (
     <Suspense
       fallback={
         <div className="grid min-h-dvh place-items-center bg-ground">
-          <p className="text-base text-ink-soft">전시장을 여는 중입니다...</p>
+          <Loader label={t('hallView.loading')} />
         </div>
       }
     >

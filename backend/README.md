@@ -48,13 +48,36 @@ backend/
 │     ├─ public.php     GET   공개 설정값 — 인증 없음 (테이블 없으면 기본값)
 │     ├─ detail.php     GET   설정 정의 + 값 (관리자)
 │     └─ update.php     POST  설정 저장 (관리자, JSON)
+│  └─ translate/
+│     ├─ status.php     GET   영문 번역 현황 — 대상별 남은 수 (관리자)
+│     └─ run.php        POST  영문 번역 실행 — 한 번에 몇 건씩 (관리자)
 └─ sql/
    ├─ schema.sql        관리자 테이블 생성 + 초기 계정
    ├─ exhibition.sql    전시 테이블 (exhibition · exhibition_file)
    ├─ exhibition_status_column.sql  분류(ex_status) 컴럼 추가 (기존 설치용)
    ├─ site_setting.sql  사이트 환경설정 테이블 (site_setting · 키 = 값)
+   ├─ translation.sql   영문 번역 표 (translation · 기계 번역 캐시)
    └─ notice_check.sql  공지 레거시 테이블 구조 확인 (읽기 전용)
 ```
+
+## 영문 번역 (기계 번역)
+
+관리자가 한국어로 쓴 글(전시·공지·전시장·팝업·개인정보처리방침)을 영문 화면(EN)에서도
+보여 주기 위해 번역 서비스로 영문을 만들어 둡니다. 영문 화면은 그 영문을 쓰고
+그 아래에 "영문은 기계 번역이며 한국어가 원문" 이라고 적습니다.
+
+1) `sql/translation.sql` 을 phpMyAdmin 에서 실행 (표가 없어도 사이트는 한국어로 정상)
+2) `config.php` 의 `translate` 절에 서비스 키를 채웁니다 (`config.sample.php` 참고)
+   - `google` 은 API 키만, `papago` 는 Client ID + Secret, `deepl` 은 Auth Key
+   - HTML 본문(전시개요·약력·공지·방침)은 태그를 지켜야 해서 **google · deepl** 을 권합니다
+3) 그 뒤에는 **한국어 글을 등록·수정할 때 자동으로 번역**됩니다.
+4) 그 전에 쓴 글은 관리자 **[영문 번역]** 메뉴에서 [남은 것 번역] 을 누르면 채워집니다.
+   (한 번에 5건씩 되풀이해 부르고, 끝나면 남은 수가 0 이 됩니다)
+
+- 원문은 각자의 표(`exhibition` · `g4_write_notice` · `hall` · `popup_banner` · `site_setting`)에
+  그대로 있고, `translation` 표에는 **파생된 영문만**입니다. (다섯 스키마를 고치지 않으려고)
+- 행마다 번역했던 한국어의 지문(sha1)을 적어 두어, 원문을 고치면 그 항목만 다시 번역됩니다.
+- 키가 없거나 통신이 실패해도 **저장은 그대로** 끝납니다. (번역은 언제든 다시 만들 수 있습니다)
 
 ## 환경설정 (site_setting)
 

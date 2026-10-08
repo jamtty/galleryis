@@ -174,6 +174,62 @@
   font-weight: 600;
   margin: 1rem 0 0.4rem;
 }
+/*
+ * 글자 서식 (굵게 · 기울임 · 밑줄 · 취소선 · 크기)
+ *
+ * 관리자 화면에만 주입되는 common.css 에 `* { font: inherit; color: inherit }`
+ * 전역 리셋이 있습니다. 이 규칙은 작성자(Author) 스타일이라 브라우저 기본값
+ * (b/strong = 굵게, i/em = 기울임, font[size] = 크기)보다 우선해서, 편집기
+ * 본문에서는 굵게·기울임·크기 버튼을 눌러도 눈에 보이지 않습니다.
+ * (공개 화면은 common.css 를 쓰지 않아 정상으로 보입니다 — 그래서 저장된 글은
+ *  홈페이지에서 굵게 나오는데 편집기에서만 안 보이던 것입니다)
+ *
+ * → common.css 뒤에 오는 이 파일에서 편집기 본문 안쪽 서식만 되살립니다.
+ *   (선택자가 `*` 보다 구체적이라 안전하게 이깁니다)
+ */
+.te-content .ProseMirror b,
+.te-content .ProseMirror strong {
+  font-weight: 700;
+}
+.te-content .ProseMirror i,
+.te-content .ProseMirror em {
+  font-style: italic;
+}
+.te-content .ProseMirror u {
+  text-decoration: underline;
+}
+.te-content .ProseMirror s,
+.te-content .ProseMirror strike,
+.te-content .ProseMirror del {
+  text-decoration: line-through;
+}
+.te-content .ProseMirror sub {
+  vertical-align: sub;
+  font-size: smaller;
+}
+.te-content .ProseMirror sup {
+  vertical-align: super;
+  font-size: smaller;
+}
+/* 예전에 저장된 글의 글자 크기 — execCommand fontSize 가 만든 <font size="1~6"> */
+.te-content .ProseMirror font[size='1'] {
+  font-size: x-small;
+}
+.te-content .ProseMirror font[size='2'] {
+  font-size: small;
+}
+.te-content .ProseMirror font[size='3'] {
+  font-size: medium;
+}
+.te-content .ProseMirror font[size='4'] {
+  font-size: large;
+}
+.te-content .ProseMirror font[size='5'] {
+  font-size: x-large;
+}
+.te-content .ProseMirror font[size='6'] {
+  font-size: xx-large;
+}
 .te-content .ProseMirror ul {
   padding-left: 2rem;
   list-style: disc;
