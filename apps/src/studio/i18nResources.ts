@@ -25,7 +25,9 @@ export const resources = {
         hint: "드래그로 둘러보고, 바닥을 누르거나 방향키로 이동하세요",
         canvasLabel: "3D 전시장 미리보기",
         entrance: "입구",
-        reception: "안내 데스크",
+        // 갤러리 요청(2026-10-09): "안내 데스크" → "데스크".
+        // 이 한 곳이 네 전시장 · 데스크톱 · 모바일 모두에 쓰입니다.
+        reception: "데스크",
       },
       works: {
         title: "나의 작품",
@@ -107,7 +109,7 @@ export const resources = {
         // was true could only ask again. These carry the measurement that
         // settles it, told "창문이 있는 벽에는 56cm까지만", nobody asks twice.
         wallWindow: "창문이 있는 벽",
-        wallDesk: "안내 데스크가 있는 벽",
+        wallDesk: "데스크가 있는 벽",
         wallPlain: "{{n}}번 벽",
         drop: {
           noRoom:

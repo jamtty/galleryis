@@ -66,8 +66,15 @@
   --text-base: 1.0625rem;
   --text-base--line-height: 1.65;
 
-  /* The hero's show title: 64px bold on a desktop, 36px on a phone. */
-  --text-display: clamp(2.25rem, 5vw, 4rem);
+  /* The hero's show title. Brought down 2026-10-09 at the gallery's request:
+     was 64px on a desktop and 36px on a phone, and the rolling banner's title
+     ran to two lines — the admin types the Korean and the English name into
+     the one title field ("강 하 린 개인전 Kang Ha Rin"), so the line is long.
+     48px at the top, and it tracks the viewport below that (the words column
+     is half the page from `lg`): a solo show's title holds one line from a
+     1280 laptop up, in both languages. Measured, not guessed — see the
+     gallery's own titles, 강 하 린 548px wide at 44.6px in a 593px column. */
+  --text-display: clamp(2rem, 3vw, 3rem);
   --text-display--line-height: 1.15;
   --text-display--letter-spacing: -0.02em;
 
